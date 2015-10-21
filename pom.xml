@@ -1,0 +1,135 @@
+<project>
+    <groupId>org.sps.learning</groupId>
+    <artifactId>learning</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    <name>spark</name>
+    <packaging>jar</packaging>
+    <version>1.0.0</version>
+
+    <!-- to be able to debug or run the script you need to define the add scala version SDK 2.10.6
+    -->
+    <properties>
+        <java.version>1.8</java.version>
+        <maven-scala-plugin.version>2.15.2</maven-scala-plugin.version>
+    </properties>
+
+  <dependencies>
+      <!-- Spark dependency -->
+      <dependency>
+          <groupId>org.apache.spark</groupId>
+          <artifactId>spark-core_2.10</artifactId>
+          <version>1.5.1</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.scala-lang</groupId>
+          <artifactId>scala-library</artifactId>
+          <version>2.10.0</version>
+      </dependency>
+
+	  <dependency>
+          <groupId>commons-io</groupId>
+		  <artifactId>commons-io</artifactId>
+		  <version>2.4</version>
+	  </dependency>
+
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>4.11</version>
+      </dependency>
+
+  </dependencies>
+
+  <build>
+      <plugins>
+              <!--<plugin>-->
+                  <!--<groupId>net.alchim31.maven</groupId>-->
+                  <!--<artifactId>scala-maven-plugin</artifactId>-->
+                  <!--<version>3.1.0</version>-->
+                  <!--<executions>-->
+                      <!--<execution>-->
+                          <!--<id>scala-compile-first</id>-->
+                          <!--<phase>process-resources</phase>-->
+                          <!--<goals>-->
+                              <!--<goal>add-source</goal>-->
+                              <!--<goal>compile</goal>-->
+                          <!--</goals>-->
+                      <!--</execution>-->
+                      <!--<execution>-->
+                          <!--<id>scala-test-compile</id>-->
+                          <!--<phase>process-test-resources</phase>-->
+                          <!--<goals>-->
+                              <!--<goal>testCompile</goal>-->
+                          <!--</goals>-->
+                      <!--</execution>-->
+                  <!--</executions>-->
+              <!--</plugin>-->
+              <!--<plugin>-->
+                  <!--<groupId>org.apache.maven.plugins</groupId>-->
+                  <!--<artifactId>maven-compiler-plugin</artifactId>-->
+                  <!--<version>3.1</version>-->
+                  <!--<configuration>-->
+                      <!--<source>${java.version}</source>-->
+                      <!--<target>${java.version}</target>-->
+                  <!--</configuration>-->
+              <!--</plugin>-->
+
+              <!--<plugin>-->
+                  <!--<groupId>org.apache.maven.plugins</groupId>-->
+                  <!--<artifactId>maven-assembly-plugin</artifactId>-->
+                  <!--<version>2.2.2</version>-->
+                  <!--&lt;!&ndash; The configuration of the plugin &ndash;&gt;-->
+                  <!--<configuration>-->
+                      <!--&lt;!&ndash; Specifies the configuration file of the assembly plugin &ndash;&gt;-->
+                      <!--<descriptors>-->
+                          <!--<descriptor>src/main/assembly/assembly.xml</descriptor>-->
+                      <!--</descriptors>-->
+                  <!--</configuration>-->
+              <!--</plugin>-->
+
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>2.3.2</version>
+              <configuration>
+                  <source>1.8</source>
+                  <target>1.8</target>
+              </configuration>
+          </plugin>
+          </plugins>
+  </build>
+
+    <repositories>
+        <repository>
+            <id>Akka repository</id>
+            <url>http://repo.akka.io/releases</url>
+        </repository>
+        <repository>
+            <id>scala</id>
+            <name>Scala Tools</name>
+            <url>http://scala-tools.org/repo-releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>scala</id>
+            <name>Scala Tools</name>
+            <url>http://scala-tools.org/repo-releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+</project>
