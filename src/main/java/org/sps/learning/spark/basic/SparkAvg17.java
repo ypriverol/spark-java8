@@ -14,6 +14,15 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function2;
 
+/**
+ * This class compute the Average of a set of number using Spark and Java 1.7 or old versions. The function classes extend the org.apache.spark.api.java.function
+ * This functions can be use to average, sum, count and average the corresponding list. The final function to agregate count and average the list of elements is based on
+ * org.apache.spark.api.java.aggregate
+ *
+ * @author Yasset Perez-Riverol (ypriverol@gmail.com)
+ * @date 21/10/15
+ *
+ */
 public final class SparkAvg17 {
 
     public static class AvgCount implements Serializable {
