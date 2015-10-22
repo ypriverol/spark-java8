@@ -23,13 +23,6 @@ import scala.Tuple2;
 
 public class SparkWordCount {
 
-    private static Function<Tuple2<String, Integer>, Boolean> filterShortest = new Function<Tuple2<String, Integer>, Boolean>() {
-        @Override
-        public Boolean call(Tuple2<String, Integer> stringIntegerTuple2) throws Exception {
-            return (stringIntegerTuple2._2() > 20);
-        }
-    };
-
     public static void main(String[] args) throws Exception {
 
 		System.out.println(System.getProperty("hadoop.home.dir"));
@@ -66,17 +59,29 @@ public class SparkWordCount {
 		JavaRDD<String> rdd = sc.textFile(inputPath);
 
         /**
+         * This function alows you to filter the JavaPairRDD for all the elements that the number
+         * of occurrences are bigger than 20.
+         */
+
+        Function<Tuple2<String, Integer>, Boolean> filterShortest = new Function<Tuple2<String, Integer>, Boolean>() {
+            @Override
+            public Boolean call(Tuple2<String, Integer> stringIntegerTuple2) throws Exception {
+                return (stringIntegerTuple2._2() > 20);
+            }
+        };
+
+        /**
          * This function allow to compute the number of occurrences for a particular word, the first instruction flatMap allows to create the key of the map by splitting
-         * each line of the JavaRDD. Map to pair do not do anything becuase it only define that a map will be done after the reduce function reduceByKey.
-         *
+         * each line of the JavaRDD. Map to pair do not do anything because it only define that a map will be done after the reduce function reduceByKey.
          */
 
 		JavaPairRDD<String, Integer> counts = rdd
 				.flatMap(x -> Arrays.asList(x.split(" ")))
 				.mapToPair(x -> new Tuple2<String, Integer>(x, 1))
-				.reduceByKey((x, y) -> x + y);
+				.reduceByKey((x, y) -> x + y)
+                .filter(filterShortest);
 
-        counts = counts.filter(filterShortest);
+
         /**
          * The RDDs can be save to a text file by using the saveAsTextFile function which export the RDD information to a text representation,
          * either a local path on the machine, or a hdfs://, s3n://, etc URI)
