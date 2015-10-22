@@ -1,4 +1,4 @@
-package org.sps.learning.spark.airline.datagen17;
+package org.sps.learning.spark.airline.datagen;
 
 import java.io.File;
 import java.io.Serializable;
@@ -15,7 +15,7 @@ import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
 //http://stackoverflow.com/questions/19620642/failed-to-locate-the-winutils-binary-in-the-hadoop-binary-path
-public class AirlineDataSampler {
+public class AirlineDataSampler17 {
 
 	public static class CustomPartitioner extends Partitioner implements Serializable{
 		private static final long serialVersionUID = 1L;
