@@ -43,7 +43,7 @@ described in the form `spark.executor.memory` as `SPARK_EXECUTOR_MEMORY`.
 ## Datasets
 
 Some of the datasets we will use in this learning tutorial are:
-  - Tweets Archive from @ypriverol is used in the wordcount
+  - Tweets Archive from @ypriverol (https://twitter.com/ypriverol) is used in the word count
   - We will be using datasets from the [KDD Cup 1999](http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html). The results
     of this competition can be found [here](http://cseweb.ucsd.edu/~elkan/clresults.html).
 
@@ -53,71 +53,12 @@ The reference book for these and other Spark related topics is:
 
 - *Learning Spark* by Holden Karau, Andy Konwinski, Patrick Wendell, and Matei Zaharia.
 
-## Notebooks
+## Examples
 
-The following notebooks can be examined individually, although there is a more
-or less linear 'story' when followed in sequence. By using the same dataset
-they try to solve a related set of tasks with it.
+The following examples can be examined individually, although there is a more or less linear 'story' when followed in sequence. By using different datasets they try to solve a related set of tasks with it.
 
-### [RDD Basic Examples](https://github.com/jadianes/spark-py-notebooks/blob/master/nb1-rdd-creation/nb1-rdd-creation.ipynb)
+### [RDD Basic Examples](https://github.com/ypriverol/spark-java8/wiki/RDD-Basic-Examples)
 
- 1- [SparkWordCount](): About reading files and parallelize.
-
-### [RDDs basics](https://github.com/jadianes/spark-py-notebooks/blob/master/nb2-rdd-basics/nb2-rdd-basics.ipynb)
-
-A look at `map`, `filter`, and `collect`.
-
-### [Sampling RDDs](https://github.com/jadianes/spark-py-notebooks/blob/master/nb3-rdd-sampling/nb3-rdd-sampling.ipynb)
-
-RDD sampling methods explained.
-
-### [RDD set operations](https://github.com/jadianes/spark-py-notebooks/blob/master/nb4-rdd-set/nb4-rdd-set.ipynb)
-
-Brief introduction to some of the RDD pseudo-set operations.
-
-### [Data aggregations on RDDs](https://github.com/jadianes/spark-py-notebooks/blob/master/nb5-rdd-aggregations/nb5-rdd-aggregations.ipynb)
-
-RDD actions `reduce`, `fold`, and `aggregate`.
-
-### [Working with key/value pair RDDs](https://github.com/jadianes/spark-py-notebooks/blob/master/nb6-rdd-key-value/nb6-rdd-key-value.ipynb)
-
-How to deal with key/value pairs in order to aggregate and explore data.
-
-### [MLlib: Basic Statistics and Exploratory Data Analysis](https://github.com/jadianes/spark-py-notebooks/blob/master/nb7-mllib-statistics/nb7-mllib-statistics.ipynb)
-
-A notebook introducing Local Vector types, basic statistics
-in MLlib for Exploratory Data Analysis and model selection.
-
-### [MLlib: Logistic Regression](https://github.com/jadianes/spark-py-notebooks/blob/master/nb8-mllib-logit/nb8-mllib-logit.ipynb)
-
-Labeled points and Logistic Regression classification of network attacks in MLlib.
-Application of model selection techniques using correlation matrix and Hypothesis Testing.
-
-### [MLlib: Decision Trees](https://github.com/jadianes/spark-py-notebooks/blob/master/nb9-mllib-trees/nb9-mllib-trees.ipynb)
-
-Use of tree-based methods and how they help explaining models and
- feature selection.
-
-### [Spark SQL: structured processing for Data Analysis](https://github.com/jadianes/spark-py-notebooks/blob/master/nb10-sql-dataframes/nb10-sql-dataframes.ipynb)
-
-In this notebook a schema is inferred for our network interactions dataset. Based on that, we use
-Spark's SQL `DataFrame` abstraction to perform a more structured exploratory data analysis.
+ 1- [SparkWordCount](): About How to create a simple JavaRDD in Spark.
 
 
-## Applications
-
-Beyond the basics. Close to real-world applications using Spark and other technologies.
-
-### [Olssen: On-line Spectral Search ENgine for proteomics](http://olssen.github.io/)
-
-Same tech stack this time with an AngularJS client app.
-
-### [An on-line movie recommendation web service](https://github.com/jadianes/spark-movie-lens)
-
-This tutorial can be used independently to build a movie recommender model based on the MovieLens dataset. Most of the code in the first part, about how to use ALS with the public MovieLens dataset, comes from my solution to one of the exercises proposed in the [CS100.1x Introduction to Big Data with Apache Spark by Anthony D. Joseph on edX](https://www.edx.org/course/introduction-big-data-apache-spark-uc-berkeleyx-cs100-1x), that is also [**publicly available since 2014 at Spark Summit**](https://databricks-training.s3.amazonaws.com/movie-recommendation-with-mllib.html).
-
-There I've added with minor modifications to use a larger dataset and also code about how to store and reload the model for later use. On top of that we build a Flask web service so the recommender can be use to provide movie recommendations on-line.
-
-### [KDD Cup 1999](https://github.com/jadianes/kdd-cup-99-spark)
-
-My try using Spark with this classic dataset and Knowledge Discovery competition.
