@@ -15,7 +15,7 @@ import scala.Tuple2;
 
 /**
  * This is a simple example of Spark of a counter, well explained and verbose about Spark and it components.
- * The wordcount example read a file from the an input file and count all the words in the file. The present version is based in java 8 lambda expressions
+ * The word count example read a file from the an input file and count all the words in the file. The present version is based in java 8 lambda expressions
  *
  * Readme some extra documentation:
  *   1- http://stackoverflow.com/questions/19620642/failed-to-locate-the-winutils-binary-in-the-hadoop-binary-path
@@ -76,9 +76,9 @@ public class SparkWordCount {
          */
 
 		JavaPairRDD<String, Integer> counts = rdd
-				.flatMap(x -> Arrays.asList(x.split(" ")))
-				.mapToPair(x -> new Tuple2<String, Integer>(x, 1))
-				.reduceByKey((x, y) -> x + y)
+                .flatMap(x -> Arrays.asList(x.split(" ")))
+                .mapToPair(x -> new Tuple2<String, Integer>(x, 1))
+                .reduceByKey((x, y) -> x + y)
                 .filter(filterShortest);
 
 
