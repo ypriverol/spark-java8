@@ -1,0 +1,46 @@
+<assembly>
+
+    <id>spark-java8-deployment</id>
+
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <dependencySets>
+        <dependencySet>
+            <!--<outputDirectory>${assembly.dir}/lib</outputDirectory>-->
+            <outputDirectory>lib</outputDirectory>
+            <unpack>false</unpack>
+            <scope>runtime</scope>
+			<outputFileNameMapping>${artifact.artifactId}-${artifact.baseVersion}.${artifact.extension}</outputFileNameMapping>
+        </dependencySet>
+    </dependencySets>
+
+    <fileSets>
+        <!-- copy jar file to the final build -->
+        <fileSet>
+            <directory>${project.basedir}/target</directory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+            <!--<outputDirectory>${assembly.dir}</outputDirectory>-->
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+
+        <!-- copy configurations to the final build-->
+        <fileSet>
+            <directory>${project.basedir}/conf</directory>
+            <outputDirectory>/conf</outputDirectory>
+            <filtered>true</filtered>
+        </fileSet>
+
+        <!-- copy shell scripts to the final build -->
+        <fileSet>
+            <directory>${project.basedir}/script</directory>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+        </fileSet>
+    </fileSets>
+</assembly>

@@ -59,7 +59,7 @@ public class SparkWordCount {
 		JavaRDD<String> rdd = sc.textFile(inputPath);
 
         /**
-         * This function alows you to filter the JavaPairRDD for all the elements that the number
+         * This function allows you to filter the JavaPairRDD for all the elements that the number
          * of occurrences are bigger than 20.
          */
 
