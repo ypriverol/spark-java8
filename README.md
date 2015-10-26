@@ -74,7 +74,7 @@ The reference book for these and other Spark related topics is:
 
 The following examples can be examined individually, although there is a more or less linear 'story' when followed in sequence. By using different datasets they try to solve a related set of tasks with it.
 
-### [RDD Basic Examples](https://github.com/ypriverol/spark-java8/wiki/RDD-Basic-Examples)
+### [RDD Basic Examples](https://github.com/ypriverol/spark-java8/wiki/2-RDD-Basic-Examples)
 
 Here a list of the most basic examples in Spark-Java8 and definition of the most basic concepts in Spark.
 
