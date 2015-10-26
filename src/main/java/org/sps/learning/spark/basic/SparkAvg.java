@@ -62,6 +62,13 @@ public final class SparkAvg {
 
         JavaRDD<Integer> rdd = sc.parallelize(Arrays.asList(1, 2, 3, 4),10);
 
+        /**
+         * By using the map transformation in Spark, we can apply a function to every element in our RDD.
+         * Java lambdas are specially expressive for this particular.
+         */
+
+        rdd = rdd.map((x) -> x * 10);
+
 
         /**
          *

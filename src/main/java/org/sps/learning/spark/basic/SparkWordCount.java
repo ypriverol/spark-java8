@@ -76,6 +76,9 @@ public class SparkWordCount {
 
         counts = counts.filter((x) -> x._2() > 20);
 
+        long time = System.currentTimeMillis();
+        long countEntries = counts.count();
+        System.out.println(countEntries + ": " + String.valueOf(System.currentTimeMillis() - time));
 
         /**
          * The RDDs can be save to a text file by using the saveAsTextFile function which export the RDD information to a text representation,
