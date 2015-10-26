@@ -27,18 +27,35 @@ learning, GraphX for graph processing, and Spark Streaming.
 ## Instructions
 
 A good way of using these examples is by first cloning the repo, and then
-starting your own [Spark Java 8](http://github.con/ypriverol/spark-java8. For example, if we have a *standalone* Spark installation
-running in our `localhost` with a maximum of 6Gb per node assigned:
+starting your own [Spark Java 8](http://github.con/ypriverol/spark-java8).
 
-    MASTER="spark://127.0.0.1:7077" SPARK_EXECUTOR_MEMORY="6G" ~/spark-1.5.0-bin-hadoop2.6/bin/pyspark
+### Installing Java 8 and Spark
 
-Notice that the path to the `pyspark` command will depend on your specific
-installation. So as requirement, you need to have
-[Spark installed](https://spark.apache.org/docs/latest/index.html) in
-the same machine you are going to start the `IPython notebook` server.
+Java 8 can be download [here](http://www.oracle.com/technetwork/java/javase/overview/java8-2100321.html). After the installation
+you need to be sure that the version you are using is java 8, you can check that by running:
 
-For more Spark options see [here](https://spark.apache.org/docs/latest/spark-standalone.html). In general it works the rule of passing options
-described in the form `spark.executor.memory` as `SPARK_EXECUTOR_MEMORY`.
+```bach
+java -version
+```
+
+In order to setup Spark locally in you machine you should download the spark version from [here](http://spark.apache.org/downloads.html). Then you should follow the next steps:
+
+```bach
+> tar zxvf spark-xxx.tgz
+> cd spark-xxx
+> build/mvn -DskipTests clean package
+```
+
+After the compilation and before running your first example you should add to your profile the [SPARK MASTER Variable](http://spark.apache.org/docs/latest/spark-standalone.html):
+
+```bach
+ > export SPARK_LOCAL_IP=127.0.0.1
+```
+To be sure that you spark is installed properly in your machine you can run the first example from spark:
+
+```bach
+> ./bin/run-example SparkPi
+```
 
 ## Datasets
 
