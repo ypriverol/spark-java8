@@ -60,7 +60,7 @@ To be sure that you spark is installed properly in your machine you can run the 
 ## Datasets
 
 Some of the datasets we will use in this learning tutorial are:
-  - Tweets Archive from @ypriverol (https://twitter.com/ypriverol) is used in the word count
+  - Tweets Archive from [@ypriverol](https://twitter.com/ypriverol) is used in the word count
   - We will be using datasets from the [KDD Cup 1999](http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html). The results
     of this competition can be found [here](http://cseweb.ucsd.edu/~elkan/clresults.html).
 
