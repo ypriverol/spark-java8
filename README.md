@@ -76,6 +76,10 @@ The following examples can be examined individually, although there is a more or
 
 ### [RDD Basic Examples](https://github.com/ypriverol/spark-java8/wiki/RDD-Basic-Examples)
 
+Here a list of the most basic examples in Spark-Java8 and definition of the most basic concepts in Spark.
+
  1- [SparkWordCount](): About How to create a simple JavaRDD in Spark.
+ 2- [MaptoDouble] (): How to generate general statistics about an RDD in Spark
+ 3- [SparkAverage] (): How to compute the average of a set of numbers in Spark.
 
 

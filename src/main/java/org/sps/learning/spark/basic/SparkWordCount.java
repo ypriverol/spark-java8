@@ -62,15 +62,19 @@ public class SparkWordCount {
          * This function allow to compute the number of occurrences for a particular word, the first instruction flatMap allows to create the key of the map by splitting
          * each line of the JavaRDD. Map to pair do not do anything because it only define that a map will be done after the reduce function reduceByKey.
          *
-         * This function allows you to filter the JavaPairRDD for all the elements that the number
-         * of occurrences are bigger than 20.
          */
 
 		JavaPairRDD<String, Integer> counts = rdd
                 .flatMap(x -> Arrays.asList(x.split(" ")))
                 .mapToPair(x -> new Tuple2<String, Integer>(x, 1))
-                .reduceByKey((x, y) -> x + y)
-                .filter((x) -> x._2() > 20);
+                .reduceByKey((x, y) -> x + y);
+
+        /**
+         * This function allows you to filter the JavaPairRDD for all the elements that the number
+         * of occurrences are bigger than 20.
+         */
+
+        counts = counts.filter((x) -> x._2() > 20);
 
 
         /**
