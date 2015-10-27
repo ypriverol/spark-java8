@@ -74,12 +74,14 @@ The reference book for these and other Spark related topics is:
 
 The following examples can be examined individually, although there is a more or less linear 'story' when followed in sequence. By using different datasets they try to solve a related set of tasks with it.
 
-### [RDD Basic Examples](https://github.com/ypriverol/spark-java8/wiki/RDD-Basic-Examples)
+### [RDD Basic Examples](https://github.com/ypriverol/spark-java8/wiki/2-RDD-Basic-Examples)
 
 Here a list of the most basic examples in Spark-Java8 and definition of the most basic concepts in Spark.
 
  1- [SparkWordCount](https://github.com/ypriverol/spark-java8/wiki/2.1--Spark-Word-Count): About How to create a simple JavaRDD in Spark.
- 2- [MaptoDouble] (https://github.com/ypriverol/spark-java8/wiki/2.2-Map-To-Double): How to generate general statistics about an RDD in Spark
- 3- [SparkAverage] (https://github.com/ypriverol/spark-java8/wiki/2.3-Spark-Average): How to compute the average of a set of numbers in Spark.
+ 
+ 2- [MaptoDouble](https://github.com/ypriverol/spark-java8/wiki/2.2-Map-To-Double): How to generate general statistics about an RDD in Spark
+ 
+ 3- [SparkAverage](https://github.com/ypriverol/spark-java8/wiki/2.3-Spark-Average): How to compute the average of a set of numbers in Spark.
 
 
