@@ -86,4 +86,4 @@ Here a list of the most basic examples in Spark-Java8 and definition of the most
 
 ### [RDD Sampling Examples](https://github.com/ypriverol/spark-java8/wiki/3-Spark-Sampling-Examples)
 
- 1- [SparkSampling](https://github.com/ypriverol/spark-java8/wiki/3.1-SparkSampling)
+ 1- [SparkSampling](https://github.com/ypriverol/spark-java8/wiki/3.1-SparkSampling): Basic Spark Sampling using functions sample and takesample.  
