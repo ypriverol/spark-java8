@@ -2,6 +2,7 @@ package org.sps.learning.spark.basic;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.spark.SparkConf;
@@ -59,15 +60,32 @@ public class SparkWordCount {
 		JavaRDD<String> rdd = sc.textFile(inputPath);
 
         /**
+         * The function collect, will get all the elements in the RDD into memory for us to work with them.
+         * For this reason it has to be used with care, specially when working with large RDDs. In the present
+         * example we will filter all the words that contain @ to check all the references to other users in twitter.
+         *
+         * The function collect return a List
+         */
+
+        JavaPairRDD<String, Integer> counts = rdd.flatMap(x -> Arrays.asList(x.split(" ")))
+                .mapToPair(x -> new Tuple2<String, Integer>(x, 1))
+                .reduceByKey((x, y) -> x + y);
+
+        List<Tuple2<String, Integer>> finalCounts = counts.filter((x) -> x._1().contains("@"))
+                .collect();
+
+        for(Tuple2<String, Integer> count: finalCounts)
+                System.out.println(count._1() + " " + count._2());
+
+        /**
          * This function allow to compute the number of occurrences for a particular word, the first instruction flatMap allows to create the key of the map by splitting
          * each line of the JavaRDD. Map to pair do not do anything because it only define that a map will be done after the reduce function reduceByKey.
          *
          */
 
-		JavaPairRDD<String, Integer> counts = rdd
-                .flatMap(x -> Arrays.asList(x.split(" ")))
-                .mapToPair(x -> new Tuple2<String, Integer>(x, 1))
-                .reduceByKey((x, y) -> x + y);
+		 counts = rdd.flatMap(x -> Arrays.asList(x.split(" ")))
+                 .mapToPair(x -> new Tuple2<String, Integer>(x, 1))
+                 .reduceByKey((x, y) -> x + y);
 
         /**
          * This function allows you to filter the JavaPairRDD for all the elements that the number
