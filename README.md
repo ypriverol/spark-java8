@@ -84,4 +84,6 @@ Here a list of the most basic examples in Spark-Java8 and definition of the most
  
  3- [SparkAverage](https://github.com/ypriverol/spark-java8/wiki/2.3-Spark-Average): How to compute the average of a set of numbers in Spark.
 
+### [RDD Sampling Examples](https://github.com/ypriverol/spark-java8/wiki/3-Spark-Sampling-Examples)
 
+ 1- [SparkSampling](https://github.com/ypriverol/spark-java8/wiki/3.1-SparkSampling)
