@@ -16,7 +16,11 @@ import org.apache.spark.api.java.JavaSparkContext;
 
 public final class SparkAvg {
 
+    /**
+     * This class allows to create an average object to count all the elements in the RDD.
+     */
     public static class AvgCount implements Serializable {
+
         public AvgCount(int total, int num) {
             total_ = total;
             num_ = num;
