@@ -6,7 +6,6 @@ package org.sps.learning.spark.basic;
  */
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.List;
 
 
 import org.apache.spark.SparkConf;
@@ -87,13 +86,10 @@ public final class SparkAvg17 {
          *
          */
 
-        Function2<AvgCount, Integer, AvgCount> addAndCount = new Function2<AvgCount, Integer, AvgCount>() {
-            @Override
-            public AvgCount call(AvgCount a, Integer x) {
-                a.total_ += x;
-                a.num_ += 1;
-                return a;
-            }
+        Function2<AvgCount, Integer, AvgCount> addAndCount = (Function2<AvgCount, Integer, AvgCount>) (a, x) -> {
+            a.total_ += x;
+            a.num_ += 1;
+            return a;
         };
 
         /**
@@ -101,13 +97,10 @@ public final class SparkAvg17 {
          * in this case add an element add the value to the total.
          */
 
-        Function2<AvgCount, AvgCount, AvgCount> combine = new Function2<AvgCount, AvgCount, AvgCount>() {
-            @Override
-            public AvgCount call(AvgCount a, AvgCount b) {
-                a.total_ += b.total_;
-                a.num_ += b.num_;
-                return a;
-            }
+        Function2<AvgCount, AvgCount, AvgCount> combine = (Function2<AvgCount, AvgCount, AvgCount>) (a, b) -> {
+            a.total_ += b.total_;
+            a.num_ += b.num_;
+            return a;
         };
 
         AvgCount initial = new AvgCount(0,0);

@@ -1,6 +1,5 @@
 package org.sps.learning.spark.basic;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaDoubleRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -36,7 +35,7 @@ public class MapToDouble17 {
         /**
          * Generate the integer numbers using java 7 or previous version
          */
-        List<Integer> numbers = new ArrayList<Integer>();
+        List<Integer> numbers = new ArrayList<>();
         Random randomGenerator = new Random();
         for(int a=0; a < 100000000; a++)
             numbers.add(randomGenerator.nextInt(100));
@@ -44,12 +43,10 @@ public class MapToDouble17 {
 
         JavaRDD<Integer> rdd = sc.parallelize(numbers, 10);
 
-		JavaDoubleRDD result = rdd.mapToDouble(new DoubleFunction<Integer>() {
-			public double call(Integer x) {
-				double y = (double) x;
-				return y * y;
-			}
-		});
+		JavaDoubleRDD result = rdd.mapToDouble((DoubleFunction<Integer>) x -> {
+            double y = (double) x;
+            return y * y;
+        });
 
         System.out.println(result.stats().toString());
 

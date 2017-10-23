@@ -26,7 +26,7 @@ public class SparkRDDSampling {
         SparkConf conf = new SparkConf().setAppName("sampling").setMaster("local").set("spark.cores.max", "10");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-        File outputFile = downloadFile("http://kdd.ics.uci.edu/databases/kddcup99/kddcup.data.gz", "kddcup.data.gz");
+        File outputFile = downloadFile("http://kdd.ics.uci.edu/databases/kddcup99/kddcup.data.gz");
 
 
         JavaRDD<String> rawData = sc.textFile(outputFile.getAbsolutePath());
@@ -61,17 +61,17 @@ public class SparkRDDSampling {
 
     }
 
-    private static File downloadFile(String downloadUrl, String outFileName) throws IOException {
+    private static File downloadFile(String downloadUrl) throws IOException {
         File outputFile = null;
         DefaultHttpClient httpClient = new DefaultHttpClient();
         HttpGet httpGet = new HttpGet(downloadUrl);
         org.apache.http.HttpResponse response = httpClient.execute(httpGet);
         HttpEntity entity = response.getEntity();
         if (entity != null) {
-            outputFile = new File(outFileName);
+            outputFile = new File("kddcup.data.gz");
             InputStream inputStream = entity.getContent();
             FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
-            int read = 0;
+            int read;
             byte[] bytes = new byte[1024];
             while ((read = inputStream.read(bytes)) != -1) {
                 fileOutputStream.write(bytes, 0, read);

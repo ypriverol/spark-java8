@@ -1,6 +1,6 @@
 <assembly>
 
-    <id>spark-java8-deployment</id>
+    <id>spark-java8-learning</id>
 
     <formats>
         <format>zip</format>

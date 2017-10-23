@@ -67,7 +67,7 @@ public class SparkWordCount {
          */
 
         JavaPairRDD<String, Integer> counts = rdd.flatMap(x -> Arrays.asList(x.split(" ")).iterator())
-                .mapToPair(x -> new Tuple2<String, Integer>(x, 1))
+                .mapToPair(x -> new Tuple2<>(x, 1))
                 .reduceByKey((x, y) -> x + y);
 
         List<Tuple2<String, Integer>> finalCounts = counts.filter((x) -> x._1().contains("@"))
@@ -83,7 +83,7 @@ public class SparkWordCount {
          */
 
 		 counts = rdd.flatMap(x -> Arrays.asList(x.split(" ")).iterator())
-                 .mapToPair(x -> new Tuple2<String, Integer>(x, 1))
+                 .mapToPair(x -> new Tuple2<>(x, 1))
                  .reduceByKey((x, y) -> x + y);
 
         /**
