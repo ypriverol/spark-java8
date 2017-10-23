@@ -10,7 +10,6 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
-import org.apache.spark.api.java.function.Function;
 import scala.Tuple2;
 
 
@@ -67,7 +66,7 @@ public class SparkWordCount {
          * The function collect return a List
          */
 
-        JavaPairRDD<String, Integer> counts = rdd.flatMap(x -> Arrays.asList(x.split(" ")))
+        JavaPairRDD<String, Integer> counts = rdd.flatMap(x -> Arrays.asList(x.split(" ")).iterator())
                 .mapToPair(x -> new Tuple2<String, Integer>(x, 1))
                 .reduceByKey((x, y) -> x + y);
 
@@ -83,7 +82,7 @@ public class SparkWordCount {
          *
          */
 
-		 counts = rdd.flatMap(x -> Arrays.asList(x.split(" ")))
+		 counts = rdd.flatMap(x -> Arrays.asList(x.split(" ")).iterator())
                  .mapToPair(x -> new Tuple2<String, Integer>(x, 1))
                  .reduceByKey((x, y) -> x + y);
 

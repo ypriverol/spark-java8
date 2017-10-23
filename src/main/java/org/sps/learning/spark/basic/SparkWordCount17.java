@@ -2,6 +2,7 @@ package org.sps.learning.spark.basic;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -26,19 +27,9 @@ public class SparkWordCount17 {
 		JavaRDD<String> rdd = sc.textFile(inputPath);
 
 		JavaPairRDD<String, Integer> counts = rdd
-				.flatMap(new FlatMapFunction<String, String>() {
-					public Iterable<String> call(String x) {
-						return Arrays.asList(x.split(" "));
-					}
-				}).mapToPair(new PairFunction<String, String, Integer>() {
-					public Tuple2<String, Integer> call(String x) {
-						return new Tuple2(x, 1);
-					}
-				}).reduceByKey(new Function2<Integer, Integer, Integer>() {
-					public Integer call(Integer x, Integer y) {
-						return x + y;
-					}
-				});
+				.flatMap(x -> Arrays.asList(x.split(" ")).iterator())
+				.mapToPair((PairFunction<String, String, Integer>) x -> new Tuple2(x, 1))
+				.reduceByKey((Function2<Integer, Integer, Integer>) (x, y) -> x + y);
 		counts.saveAsTextFile(outputPath);
 		sc.close();
 	}
