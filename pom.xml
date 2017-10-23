@@ -2,7 +2,7 @@
     <groupId>org.sps.learning</groupId>
     <artifactId>spark-java8</artifactId>
     <modelVersion>4.0.0</modelVersion>
-    <name>spark</name>
+    <name>Spark Java 8 Learning</name>
     <packaging>jar</packaging>
     <version>1.0.0</version>
 
@@ -52,54 +52,45 @@
           <version>4.3.1</version>
       </dependency>
 
+      <dependency>
+          <groupId>org.apache.spark</groupId>
+          <artifactId>spark-streaming_2.10</artifactId>
+          <version>1.6.1</version>
+          <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.spark</groupId>
+          <artifactId>spark-streaming-twitter_2.11</artifactId>
+          <version>1.6.2</version>
+          <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>org.twitter4j</groupId>
+          <artifactId>twitter4j-core</artifactId>
+          <version>4.0.5</version>
+          <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>org.twitter4j</groupId>
+          <artifactId>twitter4j-stream</artifactId>
+          <version>4.0.5</version>
+          <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.spark</groupId>
+          <artifactId>spark-sql_2.11</artifactId>
+          <version>1.6.1</version>
+          <scope>compile</scope>
+      </dependency>
+
   </dependencies>
 
   <build>
       <plugins>
-              <!--<plugin>-->
-                  <!--<groupId>net.alchim31.maven</groupId>-->
-                  <!--<artifactId>scala-maven-plugin</artifactId>-->
-                  <!--<version>3.1.0</version>-->
-                  <!--<executions>-->
-                      <!--<execution>-->
-                          <!--<id>scala-compile-first</id>-->
-                          <!--<phase>process-resources</phase>-->
-                          <!--<goals>-->
-                              <!--<goal>add-source</goal>-->
-                              <!--<goal>compile</goal>-->
-                          <!--</goals>-->
-                      <!--</execution>-->
-                      <!--<execution>-->
-                          <!--<id>scala-test-compile</id>-->
-                          <!--<phase>process-test-resources</phase>-->
-                          <!--<goals>-->
-                              <!--<goal>testCompile</goal>-->
-                          <!--</goals>-->
-                      <!--</execution>-->
-                  <!--</executions>-->
-              <!--</plugin>-->
-              <!--<plugin>-->
-                  <!--<groupId>org.apache.maven.plugins</groupId>-->
-                  <!--<artifactId>maven-compiler-plugin</artifactId>-->
-                  <!--<version>3.1</version>-->
-                  <!--<configuration>-->
-                      <!--<source>${java.version}</source>-->
-                      <!--<target>${java.version}</target>-->
-                  <!--</configuration>-->
-              <!--</plugin>-->
-
-              <!--<plugin>-->
-                  <!--<groupId>org.apache.maven.plugins</groupId>-->
-                  <!--<artifactId>maven-assembly-plugin</artifactId>-->
-                  <!--<version>2.2.2</version>-->
-                  <!--&lt;!&ndash; The configuration of the plugin &ndash;&gt;-->
-                  <!--<configuration>-->
-                      <!--&lt;!&ndash; Specifies the configuration file of the assembly plugin &ndash;&gt;-->
-                      <!--<descriptors>-->
-                          <!--<descriptor>src/main/assembly/assembly.xml</descriptor>-->
-                      <!--</descriptors>-->
-                  <!--</configuration>-->
-              <!--</plugin>-->
 
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
