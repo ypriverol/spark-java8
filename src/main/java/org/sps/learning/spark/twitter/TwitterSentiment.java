@@ -17,15 +17,13 @@ import java.io.File;
 import java.io.IOException;
 
 
-public class Sentiment {
+public class TwitterSentiment {
 
     static HashMap<String, Integer> map = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
 
-        SparkConf sparkConf = new SparkConf()
-                .setAppName("Tweets Android")
-                .setMaster("local[2]");
+        SparkConf sparkConf = new SparkConf().setAppName("TwitterSentiment").setMaster("local[2]");
         SparkContext sc = new SparkContext(sparkConf);
 
         SQLContext sqlContext = new SQLContext(sc);
@@ -49,9 +47,6 @@ public class Sentiment {
         //get trained classifier knowledgeBase
         NaiveBayesKnowledgeBase knowledgeBase = nb.getKnowledgeBase();
 
-        nb = null;
-        trainingExamples = null;
-
         //Use classifier
         nb = new NaiveBayes(knowledgeBase);
 
@@ -73,7 +68,7 @@ public class Sentiment {
 
                 Double sent = nb.predict(tweet);
 
-                System.out.println("Sentiment Prediction: " + sent);
+                System.out.println("TwitterSentiment Prediction: " + sent);
             }
 
         } catch (Exception e){

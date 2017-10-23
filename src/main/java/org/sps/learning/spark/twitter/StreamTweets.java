@@ -1,4 +1,4 @@
-package org.sps.learning.spark.twitter.stream;
+package org.sps.learning.spark.twitter;
 
 import com.google.common.io.Files;
 import org.apache.spark.SparkConf;
@@ -32,9 +32,7 @@ public class StreamTweets {
         ObjectMapper mapper = new ObjectMapper();
 
         // Set up SparkConf
-        SparkConf sparkConf = new SparkConf()
-                .setAppName("Tweets Android")
-                .setMaster("local[2]")
+        SparkConf sparkConf = new SparkConf().setAppName("Tweets Android").setMaster("local[2]")
                 .set("spark.serializer", KryoSerializer.class.getName())
                 .set("es.nodes", "localhost:9200")
                 .set("es.index.auto.create", "true");
@@ -48,9 +46,7 @@ public class StreamTweets {
 
 
         // output file, save streamed twitter data as a json file
-        final File outputFile = new File("/Users/Rebecca/Desktop/spark-sandbox-master/restaurant.json");
-//        if (outputFile.exists()) {
-//        }
+        final File outputFile = new File(StreamTweets.class.getClassLoader().getResource("data/tweets.json").toURI());
 
         //create a DStream of tweets
         String[] filters = { "@mattsinthemkt", "@IvarsClam", "@pikeplchowder", "@BaccoCafeSea", "@RadiatorWhiskey",
@@ -77,7 +73,7 @@ public class StreamTweets {
 
         // save stream to json file
         stream.foreachRDD(tweets -> {
-                    tweets.collect().stream().forEach(t -> System.out.println(t));
+                    tweets.collect().stream().forEach(System.out::println);
                     tweets.foreach(t -> Files.append(t + "\n", outputFile, Charset.defaultCharset()));
                     return null;
                 });
