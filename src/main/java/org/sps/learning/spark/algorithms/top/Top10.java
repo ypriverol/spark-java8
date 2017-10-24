@@ -37,7 +37,7 @@ import java.util.*;
  */
 public class Top10 {
 
-    public static String DATA_TOP_FILE_NAME = "./data/top/input.txt";
+    private static final String DATA_TOP_FILE_NAME = "./data/top/input.txt";
 
     public static void main(String[] args) throws Exception {
 
@@ -70,7 +70,9 @@ public class Top10 {
             return new Tuple2<>(tokens[0], Integer.parseInt(tokens[1]));
         });
 
-
+        // When a lazy collection is collected, the values are called into the list and
+        // can be printed in the standard output console. This can't be done in big parallel
+        // processing because it kills the master node.
         List<Tuple2<String,Integer>> debug1 = pairs.collect();
         for (Tuple2<String,Integer> t2 : debug1) {
             System.out.println("key="+t2._1 + "\t value= " + t2._2);
@@ -79,9 +81,8 @@ public class Top10 {
     
         // STEP-5: create a local top-10
 
-        JavaRDD<SortedMap<Integer, String>> partitions =
-                pairs.mapPartitions((Iterator<Tuple2<String,Integer>> iter) -> {
-            SortedMap<Integer, String> top10 = new TreeMap<Integer, String>();
+        JavaRDD<SortedMap<Integer, String>> partitions = pairs.mapPartitions((Iterator<Tuple2<String,Integer>> iter) -> {
+            SortedMap<Integer, String> top10 = new TreeMap<>();
             while (iter.hasNext()) {
                 Tuple2<String,Integer> tuple = iter.next();
                 top10.put(tuple._2, tuple._1);
@@ -94,7 +95,7 @@ public class Top10 {
         });
 
         // STEP-6: find a final top-10
-        SortedMap<Integer, String> finaltop10 = new TreeMap<Integer, String>();
+        SortedMap<Integer, String> finaltop10 = new TreeMap<>();
 
         List<SortedMap<Integer, String>> alltop10 = partitions.collect();
 
