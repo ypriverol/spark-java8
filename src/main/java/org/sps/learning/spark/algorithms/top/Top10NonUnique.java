@@ -6,7 +6,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.broadcast.Broadcast;
-import org.dataalgorithms.util.SparkUtil;
+import org.sps.learning.spark.utils.SparkUtil;
 import scala.Tuple2;
 
 import java.util.*;
@@ -57,7 +57,7 @@ public class Top10NonUnique {
       final int N = Integer.parseInt(args[1]);
 
       // STEP-2: create a Java Spark Context object
-      JavaSparkContext ctx = SparkUtil.createJavaSparkContext();
+      JavaSparkContext ctx = SparkUtil.createJavaSparkContext("Top10NonUnique", "local[2]");
 
       // STEP-3: broadcast the topN to all cluster nodes
       final Broadcast<Integer> topN = ctx.broadcast(N);

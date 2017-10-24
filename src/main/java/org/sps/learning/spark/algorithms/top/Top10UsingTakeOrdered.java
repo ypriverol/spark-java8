@@ -5,7 +5,7 @@ package org.sps.learning.spark.algorithms.top;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.dataalgorithms.util.SparkUtil;
+import org.sps.learning.spark.utils.SparkUtil;
 import scala.Tuple2;
 
 import java.io.Serializable;
@@ -55,7 +55,7 @@ public class Top10UsingTakeOrdered implements Serializable {
       final int N = Integer.parseInt(args[1]);
 
       // STEP-2: create a Java Spark Context object
-      JavaSparkContext ctx = SparkUtil.createJavaSparkContext();
+      JavaSparkContext ctx = SparkUtil.createJavaSparkContext("Top10UsingTakeOrdered", "local[2]");
 
       // STEP-3: create an RDD from input
       //    input record format:
