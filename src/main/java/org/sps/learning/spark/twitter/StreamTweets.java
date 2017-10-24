@@ -36,27 +36,25 @@ public class StreamTweets {
 
         JavaStreamingContext sc = new JavaStreamingContext(sparkConf, new Duration(5000));
 
-        //DataFrame for old tweets
-        JavaSparkContext jsc = sc.sparkContext();
-
         // output file, save streamed twitter data as a json file
         final File outputFile = new File("data/tweets.json");
 
         //create a DStream of tweets
-        String[] filters = { "@mattsinthemkt", "@IvarsClam", "@pikeplchowder", "@BaccoCafeSea", "@RadiatorWhiskey",
-                                "@CuttersCrab", "@japonessa", "@PinkDoorSeattle", "@CrepedeFrance1", "@place_pigalle",
-                                "Kastoori Grill", "kastoori grill", "@canlis", "@MetGrill", "@thewalrusbar",
-                                "@dahlialounge", "@RN74Seattle", "@ElGauchoSteak", "@Spinasse", "@ILBistroSeattle",
-                                "@PalisadeSea", "@SaltySeattle", "@Andaluca", "@RockCreekSea", "@salareseattle",
-                                "@AOTTSeattle", "@AlturaSeattle", "@GoldfinchTavern", "@raysboathouse", "@SeriousPieDT",
-                                "@SeriousPiePike", "@ilcorvopasta", "@ElliottsSeattle", "@mamnoontoo", "@DelanceySeattle",
-                                "@WildGingerEats", "@TheCarlileRoom", "@NellsRestaurant", "@steelheaddiner", "@EatStoneburner",
-                                "@SandPointGrill1", "@LOWELLSBar", "@ChandlersCrab", "@Local360Seattle", "@curb_cuisine",
-                                "@DukesChowder", "@PiattiSeattle", "@petitcochonsea", "@brimmerheeltap", "@rione_xiii",
-                                "@BrunswickHunt", "@coastalkitchen", "@bramlingballard", "@13CoinsSeattle", "@blueacreseafood",
-                                "@CafeMunir", "@SeatownSeabar", "@oldstovebeer", "@pikebrewing", "@SeaCoffeeWorks",
-                                "@BeechersSeattle", "@CanonSeattle", "@TheVirginiaInn", "@biscuitbitch"};
+//        String[] filters = { "@mattsinthemkt", "@IvarsClam", "@pikeplchowder", "@BaccoCafeSea", "@RadiatorWhiskey",
+//                                "@CuttersCrab", "@japonessa", "@PinkDoorSeattle", "@CrepedeFrance1", "@place_pigalle",
+//                                "Kastoori Grill", "kastoori grill", "@canlis", "@MetGrill", "@thewalrusbar",
+//                                "@dahlialounge", "@RN74Seattle", "@ElGauchoSteak", "@Spinasse", "@ILBistroSeattle",
+//                                "@PalisadeSea", "@SaltySeattle", "@Andaluca", "@RockCreekSea", "@salareseattle",
+//                                "@AOTTSeattle", "@AlturaSeattle", "@GoldfinchTavern", "@raysboathouse", "@SeriousPieDT",
+//                                "@SeriousPiePike", "@ilcorvopasta", "@ElliottsSeattle", "@mamnoontoo", "@DelanceySeattle",
+//                                "@WildGingerEats", "@TheCarlileRoom", "@NellsRestaurant", "@steelheaddiner", "@EatStoneburner",
+//                                "@SandPointGrill1", "@LOWELLSBar", "@ChandlersCrab", "@Local360Seattle", "@curb_cuisine",
+//                                "@DukesChowder", "@PiattiSeattle", "@petitcochonsea", "@brimmerheeltap", "@rione_xiii",
+//                                "@BrunswickHunt", "@coastalkitchen", "@bramlingballard", "@13CoinsSeattle", "@blueacreseafood",
+//                                "@CafeMunir", "@SeatownSeabar", "@oldstovebeer", "@pikebrewing", "@SeaCoffeeWorks",
+//                                "@BeechersSeattle", "@CanonSeattle", "@TheVirginiaInn", "@biscuitbitch"};
 
+        String[] filters = {"@ypriverol"};
 
         //get twitter stream as a string with only english tweets and containing filters
         JavaDStream<String> stream = TwitterUtils.createStream(sc, twitterAuth, filters)
@@ -64,13 +62,16 @@ public class StreamTweets {
                 .map(mapper::writeValueAsString)
                 .filter(t -> t.contains("\"language\":\"en\""));
 
+        System.out.println("Example jobs!!!!");
+
 
         // save stream to json file
         stream.foreachRDD(tweetsRDD -> {
             tweetsRDD.collect().stream().forEach(System.out::println);
-            tweetsRDD.foreach(t ->
-                    Files.append(t + "\n", outputFile, Charset.defaultCharset())
-            );
+            tweetsRDD.foreach(t -> {
+                System.out.println(t);
+                Files.append(t + "\n", outputFile, Charset.defaultCharset());
+            });
         });
 
         sc.start();

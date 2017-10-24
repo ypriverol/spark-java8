@@ -8,6 +8,7 @@ import twitter4j.Place;
 
 public class Tweet {
 
+
     private String user;
     private String text;
     private Date createdAt;
@@ -15,6 +16,7 @@ public class Tweet {
     private GeoLocation geoLocation;
     private String language;
     private String sentiment;
+
 
     public Tweet(String user, String text, Date createdAt, Place place, GeoLocation geoLocation, String language, String sent) {
         super();
