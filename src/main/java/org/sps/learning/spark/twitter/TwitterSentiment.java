@@ -8,7 +8,8 @@ import java.util.*;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
 import org.sps.learning.spark.twitter.data.NaiveBayesKnowledgeBase;
 import org.sps.learning.spark.twitter.model.NaiveBayes;
@@ -52,24 +53,27 @@ public class TwitterSentiment {
 
 
         try {
-            DataFrame tweets = sqlContext.read().json("restaurant.json"); // load old tweets into a DataFrame
-            tweets.registerTempTable("tweetDF");
+            Dataset<Row> tweets = sqlContext.read().json("restaurant.json"); // load old tweets into a DataFrame
+            tweets.createOrReplaceTempView("tweetDF");
 
-            DataFrame tweetText = sqlContext.sql("SELECT text FROM tweetDF");
+            Dataset<Row> tweetText = sqlContext.sql("SELECT text FROM tweetDF");
             long numTweets = tweetText.count();
+
             System.out.println(numTweets);
 
             //go through all tweets and analyze the sentiment of each
-            for(int i = 0; i<numTweets; i++) {
+            NaiveBayes finalNb = nb;
 
-                String tweet = tweetText.take((int) numTweets)[i].toString();
+            tweetText.foreach(tw -> {
+
+                String tweet = tw.toString();
                 tweet = tweet.substring(1, tweet.length() - 1);
                 System.out.println(tweet);
 
-                Double sent = nb.predict(tweet);
+                Double sent = finalNb.predict(tweet);
 
                 System.out.println("TwitterSentiment Prediction: " + sent);
-            }
+            });
 
         } catch (Exception e){
             System.out.println(e);

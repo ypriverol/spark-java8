@@ -4,8 +4,6 @@ import com.google.common.io.Files;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.serializer.KryoSerializer;
-import org.apache.spark.sql.DataFrame;
-import org.apache.spark.sql.SQLContext;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
@@ -32,16 +30,17 @@ public class StreamTweets {
         ObjectMapper mapper = new ObjectMapper();
 
         // Set up SparkConf
-        SparkConf sparkConf = new SparkConf().setAppName("Tweets Android").setMaster("local[2]")
+        SparkConf sparkConf = new SparkConf().setAppName("Stream Tweets").setMaster("local[2]")
                 .set("spark.serializer", KryoSerializer.class.getName())
                 .set("es.index.auto.create", "true");
+
         JavaStreamingContext sc = new JavaStreamingContext(sparkConf, new Duration(5000));
 
         //DataFrame for old tweets
         JavaSparkContext jsc = sc.sparkContext();
 
         // output file, save streamed twitter data as a json file
-        final File outputFile = new File(StreamTweets.class.getClassLoader().getResource("data/tweets.json").toURI());
+        final File outputFile = new File("data/tweets.json");
 
         //create a DStream of tweets
         String[] filters = { "@mattsinthemkt", "@IvarsClam", "@pikeplchowder", "@BaccoCafeSea", "@RadiatorWhiskey",
@@ -67,11 +66,12 @@ public class StreamTweets {
 
 
         // save stream to json file
-        stream.foreachRDD(tweets -> {
-                    tweets.collect().stream().forEach(System.out::println);
-                    tweets.foreach(t -> Files.append(t + "\n", outputFile, Charset.defaultCharset()));
-                    return null;
-                });
+        stream.foreachRDD(tweetsRDD -> {
+            tweetsRDD.collect().stream().forEach(System.out::println);
+            tweetsRDD.foreach(t ->
+                    Files.append(t + "\n", outputFile, Charset.defaultCharset())
+            );
+        });
 
         sc.start();
         sc.awaitTermination();
