@@ -34,16 +34,11 @@ public class StreamTweets {
         // Set up SparkConf
         SparkConf sparkConf = new SparkConf().setAppName("Tweets Android").setMaster("local[2]")
                 .set("spark.serializer", KryoSerializer.class.getName())
-                .set("es.nodes", "localhost:9200")
                 .set("es.index.auto.create", "true");
         JavaStreamingContext sc = new JavaStreamingContext(sparkConf, new Duration(5000));
 
         //DataFrame for old tweets
-        DataFrame oldTweets = null;
         JavaSparkContext jsc = sc.sparkContext();
-        final SQLContext[] sqlContext = {new SQLContext(jsc)};
-
-
 
         // output file, save streamed twitter data as a json file
         final File outputFile = new File(StreamTweets.class.getClassLoader().getResource("data/tweets.json").toURI());
