@@ -57,8 +57,6 @@ public class SparkRDDSampling {
         List<String> sampledDataList = rawData.takeSample(false, 100, 20);
         System.out.println(rawDataSize + " and after the sampling: " + sampledDataList.size());
 
-
-
     }
 
     private static File downloadFile(String downloadUrl) throws IOException {
@@ -68,7 +66,7 @@ public class SparkRDDSampling {
         org.apache.http.HttpResponse response = httpClient.execute(httpGet);
         HttpEntity entity = response.getEntity();
         if (entity != null) {
-            outputFile = new File("kddcup.data.gz");
+            outputFile = new File("./data/kddcup.data.gz");
             InputStream inputStream = entity.getContent();
             FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
             int read;
