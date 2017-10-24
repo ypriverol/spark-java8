@@ -37,7 +37,7 @@ import java.util.*;
  */
 public class Top10 {
 
-    public static String DATA_TOP_FILE_NAME = ".data/top/input.txt";
+    public static String DATA_TOP_FILE_NAME = "./data/top/input.txt";
 
     public static void main(String[] args) throws Exception {
 
