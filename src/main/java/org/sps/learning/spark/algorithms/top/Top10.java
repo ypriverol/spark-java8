@@ -37,7 +37,7 @@ import java.util.*;
  */
 public class Top10 {
 
-    private static final String DATA_TOP_FILE_NAME = "./data/top/input.txt";
+    private static final String DATA_TOP_FILE_NAME = "./data/tweets-count.txt";
 
     public static void main(String[] args) throws Exception {
 
@@ -66,7 +66,8 @@ public class Top10 {
         // T => Tuple2<K, V>
 
         JavaPairRDD<String,Integer> pairs = lines.mapToPair((String s) -> {
-            String[] tokens = s.split(","); // cat7,234
+            String[] tokens = s.split(",");
+            System.out.println("Complete word -- " + s);
             return new Tuple2<>(tokens[0], Integer.parseInt(tokens[1]));
         });
 
