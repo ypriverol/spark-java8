@@ -297,6 +297,8 @@ public class Featurization {
                        builder.append(",");
                     }
                     builder.append(data[23]); // the last feature (24'th)
+
+                    LOGGER.info(builder.toString());
                     //
                     return builder.toString();
                 });
