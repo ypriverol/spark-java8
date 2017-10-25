@@ -10,6 +10,7 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.mllib.linalg.DenseVector;
 import org.apache.spark.mllib.linalg.Vector;
+import org.sps.learning.spark.utils.SparkUtil;
 import scala.Tuple2;
 
 import java.io.BufferedWriter;
@@ -20,13 +21,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-//
-//
-//
-//
-//
-//
 
 /**
  * NOTE: ----------------------------------------
@@ -39,11 +33,112 @@ import java.util.Map;
  *
  * @editor Mahmoud Parsian (mahmoud.parsian@yahoo.com)
  *
+ * @author ypriverol Has modified the example for Java 8 compatibility
  *
  */
 public class OptimizedWikipediaKMeans {
 
-    private static final Logger THE_LOGGER = Logger.getLogger(OptimizedWikipediaKMeans.class);
+    private static final Logger LOGGER = Logger.getLogger(OptimizedWikipediaKMeans.class);
+    private static final String FEATURED_FILE_INOUT = "./hdfs/wikidata/featurized/";
+    private static final Integer CLUSTER_NUMBER = 100;
+    private static final Double ITERATIONS = 0.90;
+    private static final String  OUTPUT_FILE = "./data/wikidata/";
+
+    public static void main(String[] args) throws Exception {
+
+        String wikiData = FEATURED_FILE_INOUT;
+        int K = CLUSTER_NUMBER;
+        double convergeDist = ITERATIONS;
+        BufferedWriter outputWriter = null;
+        //
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YY HH:mm");
+        long progSTime = System.currentTimeMillis();
+        String outputFile = OUTPUT_FILE + sdf.format(new Date()) + ".txt";
+
+        if (args.length != 4) {
+            System.err.println("Usage: OptimizedWikipediaKMeans <file> <k> <iters> <outputfiletime_details> <errorLogFile> <outputfile>");
+            System.out.println("Using the default paramters... ");
+        }else{
+            wikiData = args[0];
+            K = Integer.parseInt(args[1]);
+            convergeDist = Double.parseDouble(args[2]);
+            outputFile = args[3];
+
+        }
+        outputWriter = new BufferedWriter(new FileWriter(outputFile + sdf.format(new Date()) + ".txt"));
+
+        JavaSparkContext context = SparkUtil.createJavaSparkContext("OptimizedWikipediaKMeans", "local[2]");
+
+        try {
+
+
+            long dataReadSTime = System.currentTimeMillis();
+            //read the input data
+            JavaRDD<Vector> data = getFeatureizedData(wikiData, context);
+            LOGGER.info("Number of data records " + data.count());
+
+            //get the initail k centriods
+            final List<Vector> centroids = getInitialCentroids(data, K);
+            LOGGER.info("Done selecting initial centroids: " + centroids.size());
+            long dataReadETime = System.currentTimeMillis();
+            LOGGER.info("Total Data Read time is " + (((double) (dataReadETime - dataReadSTime)) / 1000.0) + "\n");
+
+            double tempDist = 1.0 + convergeDist;
+            long clusteringSTime = System.currentTimeMillis();
+            long itrSTime = System.currentTimeMillis();
+            int i = 0;
+            while (tempDist > convergeDist) {
+                System.out.println("Get the closest points");
+                //assign each point to their closest centriod 				
+                JavaPairRDD<Integer, Tuple2<Vector, Integer>> closest = getClosest(data, centroids);
+                // reduce step
+                JavaPairRDD<Integer, Tuple2<Vector, Integer>> pointsGroup = closest.reduceByKey(
+                        (Function2<Tuple2<Vector, Integer>, Tuple2<Vector, Integer>, Tuple2<Vector, Integer>>) (arg0, arg1) -> new Tuple2<>(Util.add(arg0._1(), arg1._1()), arg0._2() + arg1._2()));
+                System.out.println("after reduce by key");
+                //get the new centriods				
+                Map<Integer, Vector> newCentroids = getNewCentroids(pointsGroup);
+                System.out.println("after getting new centriods");
+                //calculate the delta					
+                tempDist = Util.getDistance(centroids, newCentroids, K);
+                System.out.println("after updating the distance");
+                //assign new centriods
+                for (Map.Entry<Integer, Vector> t : newCentroids.entrySet()) {
+                    centroids.set(t.getKey(), t.getValue());
+                }
+                System.out.println("after updating centriod list");
+                long itrETime = System.currentTimeMillis();
+
+                LOGGER.info("Iteration" + (i + 1) + " took :- " + (((double) (itrETime - itrSTime)) / 1000.0) + "\n");
+                LOGGER.info("Finished iteration (delta = " + tempDist + ")");
+                itrSTime = itrETime;
+                i++;
+                System.out.println("loop ends");
+            }
+
+            long clusteringETime = System.currentTimeMillis();
+            LOGGER.info("Clustering time is " + ((double) (clusteringETime - clusteringSTime)) / (1000.0) + "\n");
+
+            long progETime = System.currentTimeMillis();
+            LOGGER.info("Total Program time is " + (((double) (progETime - progSTime)) / 1000.0) + "\n");
+            System.out.println("Total Program time is " + (((double) (progETime - progSTime)) / 1000.0) + "\n");
+            //
+            LOGGER.info("Cluster centriods:");
+            outputWriter.write("Cluster centriods:\n");
+            for (Vector t : centroids) {
+                //System.out.println("" + t.apply(0)+"\t"+t.apply(1)+"\t"+t.apply(2));
+                outputWriter.write("" + t.apply(0) + " " + t.apply(1) + " " + t.apply(2) + "\n");
+            }
+        } 
+        finally {
+            IOUtils.closeQuietly(outputWriter);
+            System.out.println("Stoping context");
+            if (context != null) {
+                context.stop();
+            }
+        }
+        //
+        System.exit(0);
+    }
 
     static Vector average(Vector vec, Integer numVectors) {
         double[] avg = new double[vec.size()];
@@ -74,98 +169,5 @@ public class OptimizedWikipediaKMeans {
             centroids.add(t);
         }
         return centroids;
-    }
-    
-
-
-    public static void main(String[] args) throws Exception {
-
-        if (args.length < 6) {
-            System.err.println("Usage: OptimizedWikipediaKMeans <file> <k> <iters> <outputfiletime_details> <errorLogFile> <outputfile>");
-            System.exit(1);
-        }
-        //
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YY HH:mm");
-        long progSTime = System.currentTimeMillis();
-        PrintWriter errorWriter = null;
-        BufferedWriter writer = null;
-        BufferedWriter outputWriter = null;
-        JavaSparkContext context = null;
-        try {
-            context = new JavaSparkContext(); // "OptimizedWikipediaKMeans"
-            final String wikiData = args[0];
-            final int K = Integer.parseInt(args[1]);
-            final double convergeDist = Double.parseDouble(args[2]);
-            //
-            writer = new BufferedWriter(new FileWriter(args[3] + sdf.format(new Date()) + ".txt"));
-            errorWriter = new PrintWriter(new FileWriter(args[4] + sdf.format(new Date()) + ".txt"));
-            outputWriter = new BufferedWriter(new FileWriter(args[5] + sdf.format(new Date()) + ".txt"));
-            //
-            long dataReadSTime = System.currentTimeMillis();
-            //read the input data
-            JavaRDD<Vector> data = getFeatureizedData(wikiData, context);
-            THE_LOGGER.info("Number of data records " + data.count());
-            //get the initail k centriods			
-            final List<Vector> centroids = getInitialCentroids(data, K);
-            THE_LOGGER.info("Done selecting initial centroids: " + centroids.size());
-            long dataReadETime = System.currentTimeMillis();
-            writer.write("Total Data Read time is " + (((double) (dataReadETime - dataReadSTime)) / 1000.0) + "\n");
-            System.out.println("Total Data Read time is " + (((double) (dataReadETime - dataReadSTime)) / 1000.0) + "\n");
-            double tempDist = 1.0 + convergeDist;
-            long clusteringSTime = System.currentTimeMillis();
-            long itrSTime = System.currentTimeMillis();
-            int i = 0;
-            while (tempDist > convergeDist) {
-                System.out.println("Get the closest points");
-                //assign each point to their closest centriod 				
-                JavaPairRDD<Integer, Tuple2<Vector, Integer>> closest = getClosest(data, centroids);
-                // reduce step
-                JavaPairRDD<Integer, Tuple2<Vector, Integer>> pointsGroup = closest.reduceByKey(
-                        (Function2<Tuple2<Vector, Integer>, Tuple2<Vector, Integer>, Tuple2<Vector, Integer>>) (arg0, arg1) -> new Tuple2<>(Util.add(arg0._1(), arg1._1()), arg0._2() + arg1._2()));
-                System.out.println("after reduce by key");
-                //get the new centriods				
-                Map<Integer, Vector> newCentroids = getNewCentroids(pointsGroup);
-                System.out.println("after getting new centriods");
-                //calculate the delta					
-                tempDist = Util.getDistance(centroids, newCentroids, K);
-                System.out.println("after updating the distance");
-                //assign new centriods
-                for (Map.Entry<Integer, Vector> t : newCentroids.entrySet()) {
-                    centroids.set(t.getKey(), t.getValue());
-                }
-                System.out.println("after updating centriod list");
-                long itrETime = System.currentTimeMillis();
-                writer.write("Iteration" + (i + 1) + " took :- " + (((double) (itrETime - itrSTime)) / 1000.0) + "\n");
-                System.out.println("Iteration" + (i + 1) + " took :- " + (((double) (itrETime - itrSTime)) / 1000.0) + "\n");
-                THE_LOGGER.info("Finished iteration (delta = " + tempDist + ")");
-                itrSTime = itrETime;
-                i++;
-                System.out.println("loop ends");
-            }
-            long clusteringETime = System.currentTimeMillis();
-            writer.write("Clustering time is " + ((double) (clusteringETime - clusteringSTime)) / (1000.0) + "\n");
-            System.out.println("Clustering time is " + ((double) (clusteringETime - clusteringSTime)) / (1000.0) + "\n");
-            long progETime = System.currentTimeMillis();
-            writer.write("Total Program time is " + (((double) (progETime - progSTime)) / 1000.0) + "\n");
-            System.out.println("Total Program time is " + (((double) (progETime - progSTime)) / 1000.0) + "\n");
-            //
-            THE_LOGGER.info("Cluster centriods:");
-            outputWriter.write("Cluster centriods:\n");
-            for (Vector t : centroids) {
-                //System.out.println("" + t.apply(0)+"\t"+t.apply(1)+"\t"+t.apply(2));
-                outputWriter.write("" + t.apply(0) + " " + t.apply(1) + " " + t.apply(2) + "\n");
-            }
-        } 
-        finally {
-            IOUtils.closeQuietly(writer);
-            IOUtils.closeQuietly(errorWriter);
-            IOUtils.closeQuietly(outputWriter);
-            System.out.println("Stoping context");
-            if (context != null) {
-                context.stop();
-            }
-        }
-        //
-        System.exit(0);
     }
 }
