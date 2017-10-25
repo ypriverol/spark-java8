@@ -1,6 +1,10 @@
 package org.sps.learning.spark.algorithms.ml.kmeans;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -9,7 +13,10 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 import org.sps.learning.spark.utils.SparkUtil;
 import scala.Tuple2;
+import scala.collection.Seq;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.stream.IntStream;
@@ -73,6 +80,7 @@ public class Featurization {
     private static final Logger LOGGER = Logger.getLogger(Featurization.class);
     private static final String WIKI_DATA_FOLDER = "./data/wikidata/";
     private static final String WIKI_FATURED_FOLDER = "./hdfs/wikidata/featurized/";
+
    
     public static void main(String[] args) throws Exception {
         
@@ -94,6 +102,13 @@ public class Featurization {
         
         // create a JavaSparkContext, used to create RDDs
         JavaSparkContext context = SparkUtil.createJavaSparkContext("Wiki Featured", "local[2]");
+
+        String[] loggers = {""};
+         context.parallelize(Arrays.asList(loggers)).foreachPartition(x -> {
+            LogManager.getRootLogger().setLevel(Level.DEBUG);
+            Log log = LogFactory.getLog("EXECUTOR-LOG:");
+            log.debug("START EXECUTOR DEBUG LOG LEVEL");
+        });
         
         //
         // read input data and create the first RDD
@@ -298,7 +313,13 @@ public class Featurization {
                     }
                     builder.append(data[23]); // the last feature (24'th)
 
-                    LOGGER.info(builder.toString());
+                    System.out.println(builder.toString());
+                    LOGGER.debug("Gaurhari" + builder.toString());
+
+                    LogManager.getRootLogger().setLevel(Level.DEBUG);
+                    Log log = LogFactory.getLog("EXECUTOR-LOG:");
+                    log.debug("START EXECUTOR DEBUG LOG LEVEL");
+
                     //
                     return builder.toString();
                 });
