@@ -7,11 +7,11 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
+import org.sps.learning.spark.utils.SparkUtil;
 import scala.Tuple2;
 
-//
-//
-//
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * A standalone Spark Java program to perform featurization of wikistats 
@@ -33,16 +33,16 @@ import scala.Tuple2;
  * 
  * The first few lines of the file are copied here:
  *
- *   20090507-040000 aa ?page=http://www.stockphotosharing.com/Themes/Images/users_raw/id.txt 3 39267
- *   20090507-040000 aa Main_Page 7 51309
- *   20090507-040000 aa Special:Boardvote 1 11631
- *   20090507-040000 aa Special:Imagelist 1 931
- *   20090505-000000 aa.b ?71G4Bo1cAdWyg 1 14463
- *   20090505-000000 aa.b Special:Statistics 1 840
- *   20090505-000000 aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019
+ *    aa ?page=http://www.stockphotosharing.com/Themes/Images/users_raw/id.txt 3 39267
+ *    aa Main_Page 7 51309
+ *    aa Special:Boardvote 1 11631
+ *    aa Special:Imagelist 1 931
+ *    aa.b ?71G4Bo1cAdWyg 1 14463
+ *    aa.b Special:Statistics 1 840
+ *    aa.b Special:Whatlinkshere/MediaWiki:Returnto 1 1019
  * 
  * The goal of this class is to convert each record of 5 items:
- * “<date_time> <project_code> <page_title> <num_hits> <page_size>”
+ * “<project_code> <page_title> <num_hits> <page_size>”
  * into 24 features (described below).
  * 
  * Note that the data in http://dumps.wikimedia.org/other/pagecounts-raw/ does not 
@@ -69,39 +69,36 @@ import scala.Tuple2;
  */          
 public class Featurization {
     
-    private static final Logger THE_LOGGER = Logger.getLogger(Featurization.class);
+    private static final Logger LOGGER = Logger.getLogger(Featurization.class);
+    private static final String WIKI_DATA_FOLDER = "./data/wikidata/";
+    private static final String WIKI_FATURED_FOLDER = "./data/wikidata/featurized/";
    
     public static void main(String[] args) throws Exception {
         
         // In this section, we will walk you through the steps 
         // to preprocess and featurize the Wikipedia dataset.
-     
-        
-        //
-        // input:
-        //
-        final String wikistatsPath = args[0]; // /data/wikistats
-        // input record: “<date_time> <project_code> <page_title> <num_hits> <page_size>”
-        THE_LOGGER.info("input path="+wikistatsPath);
-        
-        //
-        // output:
-        //
-        final String outputPath = args[1]; // for featurized data: /data/wikistats_featurized
+
+        final String wikistatsPath = WIKI_DATA_FOLDER;  // /data/wikistats
+        LOGGER.info("output path="+ wikistatsPath);
+
+        // input record: “<project_code> <page_title> <num_hits> <page_size>”
+
+        final String outputPath = WIKI_FATURED_FOLDER; // for featurized data: /data/wikistats_featurized
         // output record: “(K, V)
         // where 
         //   K: <project_code> + " " + <page_title>”
         //   V: <feature_1><,><feature_2><,>...<,><feature_24> (one feature value per hour)
-        THE_LOGGER.info("output path="+outputPath); 
+        LOGGER.info("output path="+outputPath);
 
         
         // create a JavaSparkContext, used to create RDDs
-        JavaSparkContext context = new JavaSparkContext();
+        JavaSparkContext context = SparkUtil.createJavaSparkContext("Wiki Featured", "local[2]");
         
         //
         // read input data and create the first RDD
+        // In recent implementations spark has enable to read all gz in an specific folder
         //
-        JavaRDD<String> wikistatsRDD = context.textFile(wikistatsPath);
+        JavaRDD<String> wikistatsRDD = context.textFile(wikistatsPath + "*.gz");
         
         // Next, for every line of data, we collect a tuple with elements described next.
         //
@@ -127,25 +124,21 @@ public class Featurization {
         //
         // featureMap = Tuple2<projectCode+" "+pageTitle, Tuple2<hour, NumViews>>
         JavaPairRDD<String, Tuple2<Integer,Integer>> featureMap = wikistatsRDD.mapToPair(
-            new PairFunction<String, String, Tuple2<Integer,Integer>>() {
-                @Override
-                public Tuple2<String,Tuple2<Integer,Integer>> call(String rec) {
-                    // rec =     dateTime, projectCode, pageTitle, numViews, numBytes
-                    // tokens[]      0          1           2          3        4
+                (PairFunction<String, String, Tuple2<Integer, Integer>>) rec -> {
+                    // rec =     projectCode, pageTitle, numViews, numBytes
+                    // tokens[]      0           1           2        3
                     String[] tokens = StringUtils.split(rec, " ");
-                    String dateTime = tokens[0].trim();
-                    // <date-time> field is YYYYMMDD-HHmmSS
-                    String projectCode = tokens[1].trim(); 
-                    String pageTitle = tokens[2].trim();
-                    int numViews = Integer.parseInt(tokens[3].trim()); 
-                    //String numBytes = tokens[4]; 
-                    //
+
+                    Calendar rightNow = Calendar.getInstance();
+                    int hour = rightNow.get(Calendar.HOUR_OF_DAY);
+
+                    String projectCode = tokens[0].trim();
+                    String pageTitle = tokens[1].trim();
+                    int numViews = Integer.parseInt(tokens[2].trim());
                     String K = projectCode + " " + pageTitle;
-                    int hour = Integer.parseInt(dateTime.substring(9,11)); // returns hour = HH
                     Tuple2<Integer,Integer> V = new Tuple2(hour,numViews);
                     return new Tuple2(K, V);
-                }
-        });
+                });
         
         
         // Now we want to find the average hourly views for each article (average for the same 
@@ -175,31 +168,28 @@ public class Featurization {
         //      })        
         JavaPairRDD<String, Iterable<Tuple2<Integer,Integer>>> featureMapGrouped = featureMap.groupByKey();
         JavaPairRDD<String, double[]> featureGroup = featureMapGrouped.mapValues(
-            new Function<Iterable<Tuple2<Integer,Integer>>, double[]>() {
-            @Override
-            public double[] call(Iterable<Tuple2<Integer,Integer>> rs) {
-                //
-                double[] sums = new double[24];
-                double[] counts = new double[24];
-                for (Tuple2<Integer,Integer> pair : rs) {
-                    int hour = pair._1;
-                    int numViews = pair._2;
-                    counts[hour] += 1.0;
-                    sums[hour] += numViews;
-                }
-                //
-                double[] avgs = new double[24];
-                for (int i=0; i < 24; i++) {
-                    if (counts[i] == 0) {
-                        avgs[i] = 0.0;
+                (Function<Iterable<Tuple2<Integer, Integer>>, double[]>) rs -> {
+                    //
+                    double[] sums = new double[24];
+                    double[] counts = new double[24];
+                    for (Tuple2<Integer,Integer> pair : rs) {
+                        int hour = pair._1;
+                        int numViews = pair._2;
+                        counts[hour] += 1.0;
+                        sums[hour] += numViews;
                     }
-                    else {
-                        avgs[i] = sums[i] / counts[i];
+                    //
+                    double[] avgs = new double[24];
+                    for (int i=0; i < 24; i++) {
+                        if (counts[i] == 0) {
+                            avgs[i] = 0.0;
+                        }
+                        else {
+                            avgs[i] = sums[i] / counts[i];
+                        }
                     }
-                }
-                return avgs;
-            }
-        });      
+                    return avgs;
+                });
              
  
         // Now suppose we’re only interested in those articles that were viewed 
@@ -212,9 +202,7 @@ public class Featurization {
         //  val featureGroupFiltered = featureGroup.filter(t => t._2.forall(_ > 0))  
         //
         JavaPairRDD<String, double[]> featureGroupFiltered = featureGroup.filter(
-            new Function<Tuple2<String, double[]>, Boolean>() {
-                @Override
-                public Boolean call(Tuple2<String, double[]> s) {
+                (Function<Tuple2<String, double[]>, Boolean>) s -> {
                     int nonZero = 0;
                     for (double d : s._2) {
                         if (d > 0.0) {
@@ -222,14 +210,9 @@ public class Featurization {
                         }
                     }
                     //
-                    if (nonZero == 24) {
-                        return true; // keep these records
-                    }
-                    else {
-                        return false;
-                    }
-                }
-        });
+                    // keep these records
+                    return nonZero == 24;
+                });
         
         
         
@@ -245,28 +228,25 @@ public class Featurization {
         //          t._1 -> t._2.map(_ /avgsTotal)
         //      })      
         JavaPairRDD<String, double[]> featurizedRDD = featureGroupFiltered.mapValues(
-            new Function<double[], double[]>() {
-            @Override
-            public double[] call(double[] data) {
-                //
-                double sum = 0.0;
-                for (int i=0; i < 24; i++) {
-                    sum += data[i];
-                }
-                //
-                double[] avg = new double[24];
-                for (int i=0; i < 24; i++) {
-                    avg[i] = data[i]/sum;
-                }
-                return avg;
-            }
-        }); 
+                (Function<double[], double[]>) data -> {
+                    //
+                    double sum = 0.0;
+                    for (int i=0; i < 24; i++) {
+                        sum += data[i];
+                    }
+                    //
+                    double[] avg = new double[24];
+                    for (int i=0; i < 24; i++) {
+                        avg[i] = data[i]/sum;
+                    }
+                    return avg;
+                });
         
         // Count the number of records in the preprocessed data. Recall that we 
         // potentially threw away some data when we filtered out records with 
         // zero views in a given hour.        
         long count = featurizedRDD.count();
-        THE_LOGGER.info("count="+count);
+        LOGGER.info("count="+count);
         
          
         // Finally, we can save the RDD to a file for later use. 
@@ -301,31 +281,24 @@ public class Featurization {
      *     where <key> is a String of the form [projectCode + " " + pageTitle]
      * 
      */
-    static JavaRDD<String> buildFeaturizedOutput(final JavaPairRDD<String, double[]> featurizedRDD) {
+    private static JavaRDD<String> buildFeaturizedOutput(final JavaPairRDD<String, double[]> featurizedRDD) {
 
-        JavaRDD<String> finalFeaturizedRDD = featurizedRDD.map(
-                new Function<
-                             Tuple2<String, double[]>,      // input
-                             String                         // output: final output format
-                            >() {
-                @Override
-                public String call(Tuple2<String, double[]> kv) {
+        return featurizedRDD.map(
+                (Function<Tuple2<String, double[]>, String>) kv -> {
                     StringBuilder builder = new StringBuilder();
                     //
                     builder.append(kv._1); // key
-                    builder.append("#");   // separator of key from the values/features 
+                    builder.append("#");   // separator of key from the values/features
                     //
                     double[] data = kv._2;
                     for (int i=0; i < 23; i++) {
                        builder.append(data[i]); // feature
-                       builder.append(","); 
+                       builder.append(",");
                     }
                     builder.append(data[23]); // the last feature (24'th)
                     //
-                    return builder.toString();                   
-                }
-        });
-        return finalFeaturizedRDD;
+                    return builder.toString();
+                });
     }
        
 }

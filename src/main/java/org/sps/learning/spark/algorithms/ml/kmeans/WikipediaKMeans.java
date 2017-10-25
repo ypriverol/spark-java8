@@ -97,61 +97,7 @@ import java.util.Map;
 public class WikipediaKMeans {
 
     private static final Logger THE_LOGGER = Logger.getLogger(WikipediaKMeans.class);
-
-    /**
-     * Cache the result RDD, since K-Means is an iterative machine learning 
-     * algorithm and the result will be used many times
-     *
-     * @param wikiData, a featureized data
-     * @param context a Java spark context object
-     * @return JavaPairRDD<String, Vector>, where K is <project_code> + " " + <page_title>
-     * and V is a Vector of features
-     *
-     */
-    static JavaPairRDD<String, Vector> getFeatureizedData(
-            String wikiData, 
-            JavaSparkContext context) {
-        //
-        JavaPairRDD<String, Vector> data = context.textFile(wikiData).mapToPair(
-                (PairFunction<String, String, Vector>) in -> {
-                    // in: <key><#><feature_1><,><feature_2><,>...<,><feature_24>
-                    String[] parts = StringUtils.split(in, "#");
-                    return new Tuple2<>(parts[0], Util.buildVector(parts[1], ","));
-                }).cache();
-        return data;
-    }
-
-    static Map<Integer, Vector> getNewCentroids(
-            JavaPairRDD<Integer, 
-            Iterable<Vector>> pointsGroup) {
-        //
-        Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
-                (Function<Iterable<Vector>, Vector>) ps -> Util.average(ps)).collectAsMap();
-        return newCentroids;
-    }
-
-    static JavaPairRDD<Integer, Vector> getClosest(
-            JavaPairRDD<String, Vector> data, 
-            final List<Vector> centroids) {
-        //
-        JavaPairRDD<Integer, Vector> closest = data.mapToPair(
-                (PairFunction<Tuple2<String, Vector>, Integer, Vector>) in -> new Tuple2<Integer, Vector>(Util.closestPoint(in._2(), centroids), in._2())
-        );
-        return closest;
-    }
-
-    static List<Vector> getInitialCentroids(
-            JavaPairRDD<String, Vector> data, 
-            final int K) {
-        //
-        List<Tuple2<String, Vector>> centroidTuples = data.takeSample(false, K, 42);
-        final List<Vector> centroids = new ArrayList<Vector>();
-        for (Tuple2<String, Vector> t : centroidTuples) {
-            centroids.add(t._2());
-        }
-        return centroids;
-    }
-
+    private static final String WIKI_DATA_FOLDER = "./data/wikidata/";
 
     public static void main(String[] args) throws Exception {
 
@@ -202,5 +148,61 @@ public class WikipediaKMeans {
         context.stop();
         System.exit(0);
     }
+
+
+    /**
+     * Cache the result RDD, since K-Means is an iterative machine learning
+     * algorithm and the result will be used many times
+     *
+     * @param wikiData, a featureized data
+     * @param context a Java spark context object
+     * @return JavaPairRDD<String, Vector>, where K is <project_code> + " " + <page_title>
+     * and V is a Vector of features
+     *
+     */
+    static JavaPairRDD<String, Vector> getFeatureizedData(
+            String wikiData,
+            JavaSparkContext context) {
+        //
+        JavaPairRDD<String, Vector> data = context.textFile(wikiData).mapToPair(
+                (PairFunction<String, String, Vector>) in -> {
+                    // in: <key><#><feature_1><,><feature_2><,>...<,><feature_24>
+                    String[] parts = StringUtils.split(in, "#");
+                    return new Tuple2<>(parts[0], Util.buildVector(parts[1], ","));
+                }).cache();
+        return data;
+    }
+
+    static Map<Integer, Vector> getNewCentroids(
+            JavaPairRDD<Integer,
+                    Iterable<Vector>> pointsGroup) {
+        //
+        Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
+                (Function<Iterable<Vector>, Vector>) ps -> Util.average(ps)).collectAsMap();
+        return newCentroids;
+    }
+
+    static JavaPairRDD<Integer, Vector> getClosest(
+            JavaPairRDD<String, Vector> data,
+            final List<Vector> centroids) {
+        //
+        JavaPairRDD<Integer, Vector> closest = data.mapToPair(
+                (PairFunction<Tuple2<String, Vector>, Integer, Vector>) in -> new Tuple2<Integer, Vector>(Util.closestPoint(in._2(), centroids), in._2())
+        );
+        return closest;
+    }
+
+    static List<Vector> getInitialCentroids(
+            JavaPairRDD<String, Vector> data,
+            final int K) {
+        //
+        List<Tuple2<String, Vector>> centroidTuples = data.takeSample(false, K, 42);
+        final List<Vector> centroids = new ArrayList<Vector>();
+        for (Tuple2<String, Vector> t : centroidTuples) {
+            centroids.add(t._2());
+        }
+        return centroids;
+    }
+
 
 }
