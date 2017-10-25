@@ -22,7 +22,10 @@ import org.apache.spark.api.java.JavaSparkContext;
 public class SparkUtil {
 
     public static JavaSparkContext createJavaSparkContext(String applicationName, String master){
-      SparkConf conf = new SparkConf().setAppName(applicationName).setMaster(master);;
+      SparkConf conf = new SparkConf().setAppName(applicationName).setMaster(master);
+
+      // This is need to re-write the corresponding partition.
+      conf.set("spark.hadoop.validateOutputSpecs", "false");
       JavaSparkContext ctx = new JavaSparkContext(conf);
       return ctx;
    }

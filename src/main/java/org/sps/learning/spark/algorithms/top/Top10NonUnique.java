@@ -54,27 +54,29 @@ public class Top10NonUnique {
         String inputFile = DATA_TOP_FILE_NAME;
         Integer N = NUMBER_UNIQUE_ENTRIES;
 
-       // STEP-1: handle input parameters
-      if (args.length ==  2) {
-          N = Integer.parseInt(args[1]);
-          inputFile = args[0];
-      }else {
-          System.out.println("Usage: Top10 <input-path> <topN>");
-          System.out.println("Using the default options located in: " + inputFile);
-      }
 
-      // STEP-2: create a Java Spark Context object
-      JavaSparkContext ctx = SparkUtil.createJavaSparkContext("Top10NonUnique", "local[2]");
+        // STEP-1: handle input parameters
 
-      // STEP-3: broadcast the topN to all cluster nodes
-      final Broadcast<Integer> topN = ctx.broadcast(N);
-      // now topN is available to be read from all cluster nodes
+        if (args.length ==  2) {
+            N = Integer.parseInt(args[1]);
+            inputFile = args[0];
+        }else {
+            System.out.println("Usage: Top10 <input-path> <topN>");
+            System.out.println("Using the default options located in: " + inputFile);
+        }
 
-      // STEP-4: create an RDD from input
-      //    input record format:
-      //        <string-key><,><integer-value-count>
-      JavaRDD<String> lines = ctx.textFile(inputFile, 1);
-      lines.saveAsTextFile("./hdfs/1");
+        // STEP-2: create a Java Spark Context object
+        JavaSparkContext ctx = SparkUtil.createJavaSparkContext("Top10NonUnique", "local[2]");
+
+        // STEP-3: broadcast the topN to all cluster nodes
+        final Broadcast<Integer> topN = ctx.broadcast(N);
+        // now topN is available to be read from all cluster nodes
+
+        // STEP-4: create an RDD from input
+        //    input record format:
+        //        <string-key><,><integer-value-count>
+        JavaRDD<String> lines = ctx.textFile(inputFile, 1);
+        lines.saveAsTextFile("./hdfs/1");
     
       // STEP-5: partition RDD 
       // public JavaRDD<T> coalesce(int numPartitions)

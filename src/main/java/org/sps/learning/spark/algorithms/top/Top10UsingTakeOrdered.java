@@ -43,25 +43,35 @@ import java.util.List;
  */
 public class Top10UsingTakeOrdered implements Serializable {
 
+   private static final String DATA_TOP_FILE_NAME = "./data/tweets-count.txt";
+   private static final Integer NUMBER_UNIQUE_ENTRIES = 10;
+
+
    public static void main(String[] args) throws Exception {
+
+      String inputFile = DATA_TOP_FILE_NAME;
+      Integer N = NUMBER_UNIQUE_ENTRIES;
+
+
       // STEP-1: handle input parameters
-      if (args.length != 2) {
-         System.err.println("Usage: Top10UsingTakeOrdered <input-path> <topN>");
-         System.exit(1);
+
+      if (args.length ==  2) {
+         N = Integer.parseInt(args[1]);
+         inputFile = args[0];
+      }else {
+         System.out.println("Usage: Top10 <input-path> <topN>");
+         System.out.println("Using the default options located in: " + inputFile);
       }
-      System.out.println("args[0]: <input-path>="+args[0]);
-      System.out.println("args[1]: <topN>="+args[1]);
-      final String inputPath = args[0];
-      final int N = Integer.parseInt(args[1]);
 
       // STEP-2: create a Java Spark Context object
       JavaSparkContext ctx = SparkUtil.createJavaSparkContext("Top10UsingTakeOrdered", "local[2]");
 
+
       // STEP-3: create an RDD from input
       //    input record format:
       //        <string-key><,><integer-value-count>
-      JavaRDD<String> lines = ctx.textFile(inputPath, 1);
-      lines.saveAsTextFile("/output/1");
+      JavaRDD<String> lines = ctx.textFile(inputFile, 1);
+      lines.saveAsTextFile("./hdfs/1");
 
       // STEP-4: partition RDD
       // public JavaRDD<T> coalesce(int numPartitions)
@@ -75,11 +85,11 @@ public class Top10UsingTakeOrdered implements Serializable {
           String[] tokens = s.split(","); // url,789
           return new Tuple2<String,Integer>(tokens[0], Integer.parseInt(tokens[1]));
       });
-      kv.saveAsTextFile("/output/2");
+      kv.saveAsTextFile("./hdfs/2");
 
       // STEP-6: reduce frequent K's
       JavaPairRDD<String, Integer> uniqueKeys = kv.reduceByKey((Integer i1, Integer i2) -> i1 + i2);
-      uniqueKeys.saveAsTextFile("/output/3");
+      uniqueKeys.saveAsTextFile("./hdfs/3");
 
       // STEP-7: find final top-N by calling takeOrdered()
       List<Tuple2<String, Integer>> topNResult = uniqueKeys.takeOrdered(N, MyTupleComparator.INSTANCE);
