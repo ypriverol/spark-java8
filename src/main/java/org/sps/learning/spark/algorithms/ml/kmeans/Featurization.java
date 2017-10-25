@@ -12,6 +12,7 @@ import scala.Tuple2;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.stream.IntStream;
 
 /**
  * A standalone Spark Java program to perform featurization of wikistats 
@@ -71,7 +72,7 @@ public class Featurization {
     
     private static final Logger LOGGER = Logger.getLogger(Featurization.class);
     private static final String WIKI_DATA_FOLDER = "./data/wikidata/";
-    private static final String WIKI_FATURED_FOLDER = "./data/wikidata/featurized/";
+    private static final String WIKI_FATURED_FOLDER = "./hdfs/wikidata/featurized/";
    
     public static void main(String[] args) throws Exception {
         
@@ -172,22 +173,23 @@ public class Featurization {
                     //
                     double[] sums = new double[24];
                     double[] counts = new double[24];
-                    for (Tuple2<Integer,Integer> pair : rs) {
+                    rs.forEach( pair -> {
                         int hour = pair._1;
                         int numViews = pair._2;
                         counts[hour] += 1.0;
                         sums[hour] += numViews;
-                    }
-                    //
+                    });
                     double[] avgs = new double[24];
-                    for (int i=0; i < 24; i++) {
-                        if (counts[i] == 0) {
-                            avgs[i] = 0.0;
-                        }
-                        else {
-                            avgs[i] = sums[i] / counts[i];
-                        }
-                    }
+                    IntStream.range(0, 10).forEach(
+                            i -> {
+                                if (counts[i] == 0) {
+                                    avgs[i] = 0.0;
+                                }
+                                else {
+                                    avgs[i] = sums[i] / counts[i];
+                                }
+                            }
+                    );
                     return avgs;
                 });
              
@@ -205,9 +207,8 @@ public class Featurization {
                 (Function<Tuple2<String, double[]>, Boolean>) s -> {
                     int nonZero = 0;
                     for (double d : s._2) {
-                        if (d > 0.0) {
+                        if (d > 0.0)
                             nonZero++;
-                        }
                     }
                     //
                     // keep these records
@@ -230,15 +231,15 @@ public class Featurization {
         JavaPairRDD<String, double[]> featurizedRDD = featureGroupFiltered.mapValues(
                 (Function<double[], double[]>) data -> {
                     //
-                    double sum = 0.0;
-                    for (int i=0; i < 24; i++) {
-                        sum += data[i];
-                    }
+                    final double[] sum = {0.0};
+                    IntStream.range(0, 24).forEach( i ->  {
+                        sum[0] += data[i];
+                    });
                     //
                     double[] avg = new double[24];
-                    for (int i=0; i < 24; i++) {
-                        avg[i] = data[i]/sum;
-                    }
+                    IntStream.range(0, 24).forEach( i -> {
+                        avg[i] = data[i]/ sum[0];
+                    });
                     return avg;
                 });
         
