@@ -102,13 +102,6 @@ public class Featurization {
         
         // create a JavaSparkContext, used to create RDDs
         JavaSparkContext context = SparkUtil.createJavaSparkContext("Wiki Featured", "local[2]");
-
-        String[] loggers = {""};
-         context.parallelize(Arrays.asList(loggers)).foreachPartition(x -> {
-            LogManager.getRootLogger().setLevel(Level.DEBUG);
-            Log log = LogFactory.getLog("EXECUTOR-LOG:");
-            log.debug("START EXECUTOR DEBUG LOG LEVEL");
-        });
         
         //
         // read input data and create the first RDD
@@ -315,10 +308,6 @@ public class Featurization {
 
                     System.out.println(builder.toString());
                     LOGGER.debug("Gaurhari" + builder.toString());
-
-                    LogManager.getRootLogger().setLevel(Level.DEBUG);
-                    Log log = LogFactory.getLog("EXECUTOR-LOG:");
-                    log.debug("START EXECUTOR DEBUG LOG LEVEL");
 
                     //
                     return builder.toString();
