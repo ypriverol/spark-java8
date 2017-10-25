@@ -45,16 +45,23 @@ import java.util.*;
  *
  */
 public class Top10NonUnique {
+    private static final String DATA_TOP_FILE_NAME = "./data/tweets-count.txt";
+    private static final Integer NUMBER_UNIQUE_ENTRIES = 10;
 
-   public static void main(String[] args) throws Exception {
-      // STEP-1: handle input parameters
-      if (args.length < 2) {
-         System.err.println("Usage: Top10 <input-path> <topN>");
-         System.exit(1);
+
+    public static void main(String[] args) throws Exception {
+
+        String inputFile = DATA_TOP_FILE_NAME;
+        Integer N = NUMBER_UNIQUE_ENTRIES;
+
+       // STEP-1: handle input parameters
+      if (args.length ==  2) {
+          N = Integer.parseInt(args[1]);
+          inputFile = args[0];
+      }else {
+          System.out.println("Usage: Top10 <input-path> <topN>");
+          System.out.println("Using the default options located in: " + inputFile);
       }
-      System.out.println("args[0]: <input-path>="+args[0]);
-      System.out.println("args[1]: <topN>="+args[1]);
-      final int N = Integer.parseInt(args[1]);
 
       // STEP-2: create a Java Spark Context object
       JavaSparkContext ctx = SparkUtil.createJavaSparkContext("Top10NonUnique", "local[2]");
@@ -66,8 +73,8 @@ public class Top10NonUnique {
       // STEP-4: create an RDD from input
       //    input record format:
       //        <string-key><,><integer-value-count>
-      JavaRDD<String> lines = ctx.textFile(args[0], 1);
-      lines.saveAsTextFile("/output/1");
+      JavaRDD<String> lines = ctx.textFile(inputFile, 1);
+      lines.saveAsTextFile("./hdfs/1");
     
       // STEP-5: partition RDD 
       // public JavaRDD<T> coalesce(int numPartitions)
@@ -81,11 +88,11 @@ public class Top10NonUnique {
           String[] tokens = s.split(","); // url,789
           return new Tuple2<String,Integer>(tokens[0], Integer.parseInt(tokens[1]));
       });
-      kv.saveAsTextFile("/output/2");
+      kv.saveAsTextFile("./hdfs/2");
 
       // STEP-7: reduce frequent K's
       JavaPairRDD<String, Integer> uniqueKeys = kv.reduceByKey((Integer i1, Integer i2) -> i1 + i2);
-      uniqueKeys.saveAsTextFile("/output/3");
+      uniqueKeys.saveAsTextFile("./hdfs/3");
     
       // STEP-8: create a local top-N
       JavaRDD<SortedMap<Integer, String>> partitions = 
@@ -102,7 +109,7 @@ public class Top10NonUnique {
           }
           return Collections.singletonList(localTopN).iterator();
       });
-      partitions.saveAsTextFile("/output/4");
+      partitions.saveAsTextFile("./hdfs/4");
 
       // STEP-9: find a final top-N
       SortedMap<Integer, String> finalTopN = new TreeMap<Integer, String>();
