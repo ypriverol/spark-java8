@@ -1,7 +1,6 @@
 package org.sps.learning.spark.utils;
 
 import org.apache.log4j.Logger;
-import org.sps.learning.spark.algorithms.ml.kmeans.Featurization;
 
 import java.sql.Date;
 import java.sql.Timestamp;

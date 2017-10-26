@@ -1,4 +1,4 @@
-package org.sps.learning.spark.algorithms.ml.kmeans;
+package org.sps.learning.spark.algorithms.ml.rawkmeans;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;

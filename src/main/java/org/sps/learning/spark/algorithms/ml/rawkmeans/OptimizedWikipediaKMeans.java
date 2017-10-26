@@ -1,4 +1,4 @@
-package org.sps.learning.spark.algorithms.ml.kmeans;
+package org.sps.learning.spark.algorithms.ml.rawkmeans;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -15,7 +15,6 @@ import scala.Tuple2;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
