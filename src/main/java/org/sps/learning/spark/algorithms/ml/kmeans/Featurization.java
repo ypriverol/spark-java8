@@ -1,24 +1,18 @@
 package org.sps.learning.spark.algorithms.ml.kmeans;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
+import org.sps.learning.spark.utils.DateUtils;
 import org.sps.learning.spark.utils.SparkUtil;
 import scala.Tuple2;
-import scala.collection.Seq;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.stream.IntStream;
 
 /**
@@ -75,7 +69,7 @@ import java.util.stream.IntStream;
  * 
  *
  */          
-public class Featurization {
+public class Featurization implements Serializable{
     
     private static final Logger LOGGER = Logger.getLogger(Featurization.class);
     private static final String WIKI_DATA_FOLDER = "./data/wikidata/";
@@ -134,20 +128,27 @@ public class Featurization {
         // featureMap = Tuple2<projectCode+" "+pageTitle, Tuple2<hour, NumViews>>
         JavaPairRDD<String, Tuple2<Integer,Integer>> featureMap = wikistatsRDD.mapToPair(
                 (PairFunction<String, String, Tuple2<Integer, Integer>>) rec -> {
-                    // rec =     projectCode, pageTitle, numViews, numBytes
-                    // tokens[]      0           1           2        3
+                    // rec =     dateTime, projectCode, pageTitle, numViews, numBytes
+                    // tokens[]      0          1           2          3        4
                     String[] tokens = StringUtils.split(rec, " ");
-
-                    Calendar rightNow = Calendar.getInstance();
-                    int hour = rightNow.get(Calendar.HOUR_OF_DAY);
-
+                    //String dateTime = tokens[0].trim();
+                    String dateTime = DateUtils.generateRandomDateJava();
+                    // <date-time> field is YYYYMMDD-HHmmSS
                     String projectCode = tokens[0].trim();
                     String pageTitle = tokens[1].trim();
                     int numViews = Integer.parseInt(tokens[2].trim());
-                    String K = projectCode + " " + pageTitle;
+                    //String numBytes = tokens[4];
+                    //
+//                    String K = projectCode + " " + pageTitle;
+                    String K = projectCode;
+                    //LOGGER.info(K);
+                    int hour = Integer.parseInt(dateTime.substring(9,11)); // returns hour = HH
                     Tuple2<Integer,Integer> V = new Tuple2(hour,numViews);
                     return new Tuple2(K, V);
                 });
+
+        long count = featureMap.count();
+        LOGGER.info("count="+count);
         
         
         // Now we want to find the average hourly views for each article (average for the same 
@@ -176,19 +177,31 @@ public class Featurization {
         //          article -> avgs
         //      })        
         JavaPairRDD<String, Iterable<Tuple2<Integer,Integer>>> featureMapGrouped = featureMap.groupByKey();
+        count = featureMapGrouped.count();
+        LOGGER.info("count="+count);
+
         JavaPairRDD<String, double[]> featureGroup = featureMapGrouped.mapValues(
+
                 (Function<Iterable<Tuple2<Integer, Integer>>, double[]>) rs -> {
                     //
-                    double[] sums = new double[24];
-                    double[] counts = new double[24];
+                    double[] sums = new double[2];
+                    double[] counts = new double[2];
                     rs.forEach( pair -> {
                         int hour = pair._1;
                         int numViews = pair._2;
-                        counts[hour] += 1.0;
-                        sums[hour] += numViews;
+                        if(hour < 12){
+                            counts[0] += 1.0;
+                            sums[0] += numViews;
+                        }else {
+                            counts[1] += 1.0;
+                            sums[1] += numViews;
+                        }
+
                     });
-                    double[] avgs = new double[24];
-                    IntStream.range(0, 10).forEach(
+                    double[] avgs = new double[2];
+                    LOGGER.info("Counts : " + Arrays.toString(counts) + " ---"+ "SUM: " + Arrays.toString(sums));
+
+                    IntStream.range(0, 2).forEach(
                             i -> {
                                 if (counts[i] == 0) {
                                     avgs[i] = 0.0;
@@ -220,7 +233,7 @@ public class Featurization {
                     }
                     //
                     // keep these records
-                    return nonZero == 24;
+                    return nonZero == 2;
                 });
         
         
@@ -240,12 +253,12 @@ public class Featurization {
                 (Function<double[], double[]>) data -> {
                     //
                     final double[] sum = {0.0};
-                    IntStream.range(0, 24).forEach( i ->  {
+                    IntStream.range(0, 2).forEach( i ->  {
                         sum[0] += data[i];
                     });
                     //
-                    double[] avg = new double[24];
-                    IntStream.range(0, 24).forEach( i -> {
+                    double[] avg = new double[2];
+                    IntStream.range(0, 2).forEach( i -> {
                         avg[i] = data[i]/ sum[0];
                     });
                     return avg;
@@ -254,7 +267,7 @@ public class Featurization {
         // Count the number of records in the preprocessed data. Recall that we 
         // potentially threw away some data when we filtered out records with 
         // zero views in a given hour.        
-        long count = featurizedRDD.count();
+        count = featurizedRDD.count();
         LOGGER.info("count="+count);
         
          
@@ -266,7 +279,7 @@ public class Featurization {
         //  Scala:
         //      featurizedRDD.cache.map(t => t._1 + "#" + t._2.mkString(","))
         //
-        JavaRDD<String> finalFeaturizedRDD = buildFeaturizedOutput(featurizedRDD);
+        JavaRDD<String> finalFeaturizedRDD = new FeaturizedOutput().buildFeaturizedOutput(featurizedRDD);
         
         //
         // save the final output for future use
@@ -275,43 +288,6 @@ public class Featurization {
         
         // done
         context.close();
-    }
-    
-    /**
-     * 
-     * Build the featureized output, to be used by future applications such as K-Means
-     * 
-     * @param featurizedRDD an RDD, where key is a String of the form [projectCode + " " + pageTitle] 
-     * and value is a list of 24 features (one per hour)
-     * 
-     * @return JavaRDD<String>, which may be used later on for analytics such as K-Means.
-     * Each item of the output RDD will have:
-     *     <key><#><feature_1><,><feature_2><,>...<,><feature_24>
-     *     where <key> is a String of the form [projectCode + " " + pageTitle]
-     * 
-     */
-    private static JavaRDD<String> buildFeaturizedOutput(final JavaPairRDD<String, double[]> featurizedRDD) {
-
-        return featurizedRDD.map(
-                (Function<Tuple2<String, double[]>, String>) kv -> {
-                    StringBuilder builder = new StringBuilder();
-                    //
-                    builder.append(kv._1); // key
-                    builder.append("#");   // separator of key from the values/features
-                    //
-                    double[] data = kv._2;
-                    for (int i=0; i < 23; i++) {
-                       builder.append(data[i]); // feature
-                       builder.append(",");
-                    }
-                    builder.append(data[23]); // the last feature (24'th)
-
-                    System.out.println(builder.toString());
-                    LOGGER.debug("Gaurhari" + builder.toString());
-
-                    //
-                    return builder.toString();
-                });
     }
        
 }
