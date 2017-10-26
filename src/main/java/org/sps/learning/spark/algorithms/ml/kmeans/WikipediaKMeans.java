@@ -7,6 +7,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.mllib.linalg.Vector;
+import org.sps.learning.spark.utils.SparkUtil;
 import scala.Tuple2;
 
 import java.util.ArrayList;
@@ -102,7 +103,7 @@ public class WikipediaKMeans {
     public static void main(String[] args) throws Exception {
 
         // create a JavaSparkContext, which is used to create RDDs
-        JavaSparkContext context = new JavaSparkContext();
+        JavaSparkContext context = SparkUtil.createJavaSparkContext("WikiMeans", "local[2]");
         //
         final int K = 10;
         final double convergeDist = .000001;

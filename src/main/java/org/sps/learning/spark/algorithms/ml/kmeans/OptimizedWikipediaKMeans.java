@@ -150,7 +150,7 @@ public class OptimizedWikipediaKMeans {
     }
 
     static JavaRDD<Vector> getFeatureizedData(String wikiData, JavaSparkContext context) {
-        return context.textFile(wikiData).map((Function<String, Vector>) arg0 -> Util.buildVector(arg0, "\t")).cache();
+        return context.textFile(wikiData).map((Function<String, Vector>) arg0 -> Util.buildVector(arg0, ",")).cache();
     }
 
     static Map<Integer, Vector> getNewCentroids(JavaPairRDD<Integer, Tuple2<Vector, Integer>> pointsGroup) {

@@ -40,7 +40,7 @@ public class Util {
     static Vector buildVector(final String features, final String delimiter) {
         String[] tokens = StringUtils.split(features, delimiter);
         double[] d = new double[tokens.length];
-        for (int i = 0; i < d.length; i++) {
+        for (int i = 1; i < d.length; i++) {
             d[i] = Double.parseDouble(tokens[i]);
         }
         return new DenseVector(d);

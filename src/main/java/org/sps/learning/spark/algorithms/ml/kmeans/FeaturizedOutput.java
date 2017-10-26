@@ -47,7 +47,7 @@ public class FeaturizedOutput implements Serializable{
                     StringBuilder builder = new StringBuilder();
                     //
                     builder.append(kv._1); // key
-                    builder.append("#");   // separator of key from the values/features
+                    builder.append(",");   // separator of key from the values/features
                     //
                     double[] data = kv._2;
                     for (int i=0; i < 1; i++) {
