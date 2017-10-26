@@ -83,7 +83,7 @@ public class Top10UsingTakeOrdered implements Serializable {
       // T => Tuple2<K, V>
       JavaPairRDD<String,Integer> kv = rdd.mapToPair((String s) -> {
           String[] tokens = s.split(","); // url,789
-          return new Tuple2<String,Integer>(tokens[0], Integer.parseInt(tokens[1]));
+          return new Tuple2<>(tokens[0], Integer.parseInt(tokens[1]));
       });
       kv.saveAsTextFile("./hdfs/2");
 

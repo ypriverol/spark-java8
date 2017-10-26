@@ -140,11 +140,10 @@ public class Featurization implements Serializable{
                     //String numBytes = tokens[4];
                     //
 //                    String K = projectCode + " " + pageTitle;
-                    String K = projectCode;
                     //LOGGER.info(K);
                     int hour = Integer.parseInt(dateTime.substring(9,11)); // returns hour = HH
                     Tuple2<Integer,Integer> V = new Tuple2(hour,numViews);
-                    return new Tuple2(K, V);
+                    return new Tuple2(projectCode, V);
                 });
 
         long count = featureMap.count();
@@ -253,14 +252,10 @@ public class Featurization implements Serializable{
                 (Function<double[], double[]>) data -> {
                     //
                     final double[] sum = {0.0};
-                    IntStream.range(0, 2).forEach( i ->  {
-                        sum[0] += data[i];
-                    });
+                    IntStream.range(0, 2).forEach( i -> sum[0] += data[i]);
                     //
                     double[] avg = new double[2];
-                    IntStream.range(0, 2).forEach( i -> {
-                        avg[i] = data[i]/ sum[0];
-                    });
+                    IntStream.range(0, 2).forEach( i -> avg[i] = data[i]/ sum[0]);
                     return avg;
                 });
         

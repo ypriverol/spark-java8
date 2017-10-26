@@ -49,7 +49,7 @@ public class OptimizedWikipediaKMeans {
         String wikiData = FEATURED_FILE_INOUT;
         int K = CLUSTER_NUMBER;
         double convergeDist = ITERATIONS;
-        BufferedWriter outputWriter = null;
+        BufferedWriter outputWriter;
         //
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YY HH:mm");
         long progSTime = System.currentTimeMillis();
@@ -164,10 +164,8 @@ public class OptimizedWikipediaKMeans {
 
     static List<Vector> getInitialCentroids(JavaRDD<Vector> data, final int K) {
         List<Vector> centroidTuples = data.take(K);
-        final List<Vector> centroids = new ArrayList<Vector>();
-        for (Vector t : centroidTuples) {
-            centroids.add(t);
-        }
+        final List<Vector> centroids = new ArrayList<>();
+        centroids.addAll(centroidTuples);
         return centroids;
     }
 }

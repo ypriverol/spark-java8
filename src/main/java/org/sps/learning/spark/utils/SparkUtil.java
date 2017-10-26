@@ -26,11 +26,7 @@ public class SparkUtil {
 
       // This is need to re-write the corresponding partition.
       conf.set("spark.hadoop.validateOutputSpecs", "false");
-      JavaSparkContext ctx = new JavaSparkContext(conf);
-      return ctx;
+      return new JavaSparkContext(conf);
    }
-   
-   public static String version() {
-      return "2.0.0";
-   }   
+
 }

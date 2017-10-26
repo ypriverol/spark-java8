@@ -77,7 +77,7 @@ public class Util {
     }
 
     static Vector average(Iterable<Vector> ps) {
-        List<Vector> list = new ArrayList<Vector>();
+        List<Vector> list = new ArrayList<>();
         for (Vector v : ps) {
             list.add(v);
         }

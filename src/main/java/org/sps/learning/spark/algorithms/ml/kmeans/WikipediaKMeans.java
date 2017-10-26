@@ -165,32 +165,29 @@ public class WikipediaKMeans {
             String wikiData,
             JavaSparkContext context) {
         //
-        JavaPairRDD<String, Vector> data = context.textFile(wikiData).mapToPair(
+        return context.textFile(wikiData).mapToPair(
                 (PairFunction<String, String, Vector>) in -> {
                     // in: <key><#><feature_1><,><feature_2><,>...<,><feature_24>
                     String[] parts = StringUtils.split(in, "#");
                     return new Tuple2<>(parts[0], Util.buildVector(parts[1], ","));
                 }).cache();
-        return data;
     }
 
     static Map<Integer, Vector> getNewCentroids(
             JavaPairRDD<Integer,
                     Iterable<Vector>> pointsGroup) {
         //
-        Map<Integer, Vector> newCentroids = pointsGroup.mapValues(
-                (Function<Iterable<Vector>, Vector>) ps -> Util.average(ps)).collectAsMap();
-        return newCentroids;
+        return pointsGroup.mapValues(
+                (Function<Iterable<Vector>, Vector>) Util::average).collectAsMap();
     }
 
     static JavaPairRDD<Integer, Vector> getClosest(
             JavaPairRDD<String, Vector> data,
             final List<Vector> centroids) {
         //
-        JavaPairRDD<Integer, Vector> closest = data.mapToPair(
-                (PairFunction<Tuple2<String, Vector>, Integer, Vector>) in -> new Tuple2<Integer, Vector>(Util.closestPoint(in._2(), centroids), in._2())
+        return data.mapToPair(
+                (PairFunction<Tuple2<String, Vector>, Integer, Vector>) in -> new Tuple2<>(Util.closestPoint(in._2(), centroids), in._2())
         );
-        return closest;
     }
 
     static List<Vector> getInitialCentroids(
@@ -198,7 +195,7 @@ public class WikipediaKMeans {
             final int K) {
         //
         List<Tuple2<String, Vector>> centroidTuples = data.takeSample(false, K, 42);
-        final List<Vector> centroids = new ArrayList<Vector>();
+        final List<Vector> centroids = new ArrayList<>();
         for (Tuple2<String, Vector> t : centroidTuples) {
             centroids.add(t._2());
         }

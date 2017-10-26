@@ -88,7 +88,7 @@ public class Top10NonUnique {
       // T => Tuple2<K, V>
       JavaPairRDD<String,Integer> kv = rdd.mapToPair((String s) -> {
           String[] tokens = s.split(","); // url,789
-          return new Tuple2<String,Integer>(tokens[0], Integer.parseInt(tokens[1]));
+          return new Tuple2<>(tokens[0], Integer.parseInt(tokens[1]));
       });
       kv.saveAsTextFile("./hdfs/2");
 
@@ -100,7 +100,7 @@ public class Top10NonUnique {
       JavaRDD<SortedMap<Integer, String>> partitions = 
               uniqueKeys.mapPartitions((Iterator<Tuple2<String,Integer>> iter) -> {
           final int N1 = topN.value();
-          SortedMap<Integer, String> localTopN = new TreeMap<Integer, String>();
+          SortedMap<Integer, String> localTopN = new TreeMap<>();
           while (iter.hasNext()) {
               Tuple2<String,Integer> tuple = iter.next();
               localTopN.put(tuple._2, tuple._1);
@@ -114,7 +114,7 @@ public class Top10NonUnique {
       partitions.saveAsTextFile("./hdfs/4");
 
       // STEP-9: find a final top-N
-      SortedMap<Integer, String> finalTopN = new TreeMap<Integer, String>();
+      SortedMap<Integer, String> finalTopN = new TreeMap<>();
       List<SortedMap<Integer, String>> allTopN = partitions.collect();
       for (SortedMap<Integer, String> localTopN : allTopN) {
          for (Map.Entry<Integer, String> entry : localTopN.entrySet()) {

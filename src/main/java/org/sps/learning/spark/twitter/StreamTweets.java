@@ -63,7 +63,7 @@ public class StreamTweets {
         JavaReceiverInputDStream<Status> twitterStream = TwitterUtils.createStream(sc, filters);
 
         // get output text of all tweets
-        JavaDStream<String> statuses = twitterStream.map((Function<Status, String>) status -> status.getText());
+        JavaDStream<String> statuses = twitterStream.map((Function<Status, String>) Status::getText);
 
         // split tweet stream into word stream (split a tweet into words)
         JavaDStream<String> words = statuses.flatMap(l -> Arrays.asList(l.split(" ")).iterator());
@@ -85,12 +85,8 @@ public class StreamTweets {
     *   2. Perform sliding window operation
     */
         JavaPairDStream<String, Integer> counts = tuples.reduceByKeyAndWindow(
-                new Function2<Integer, Integer, Integer>() {
-                    public Integer call(Integer i1, Integer i2) { return i1 + i2; }
-                },
-                new Function2<Integer, Integer, Integer>() {
-                    public Integer call(Integer i1, Integer i2) { return i1 - i2; }
-                },
+                (Function2<Integer, Integer, Integer>) (i1, i2) -> i1 + i2,
+                (Function2<Integer, Integer, Integer>) (i1, i2) -> i1 - i2,
                 new Duration(60 * 5 * 1000),    /* Window Length */
                 new Duration(60 * 5 * 1000)     /* Sliding Interval */
         );
@@ -101,20 +97,12 @@ public class StreamTweets {
     *   1. Map function to swap the Tuple (Tuple<word, count> to Tuple<count, word>)
     */
         JavaPairDStream<Integer, String> swappedCounts = counts.mapToPair(
-                new PairFunction<Tuple2<String, Integer>, Integer, String>() {
-                    public Tuple2<Integer, String> call(Tuple2<String, Integer> in) {
-                        return in.swap();
-                    }
-                }
+                (PairFunction<Tuple2<String, Integer>, Integer, String>) in -> in.swap()
         );
 
         // Apply transformation to sort by hashtags/key (by count)
         JavaPairDStream<Integer, String> sortedCounts = swappedCounts.transformToPair(
-                new Function<JavaPairRDD<Integer, String>, JavaPairRDD<Integer, String>>() {
-                    public JavaPairRDD<Integer, String> call(JavaPairRDD<Integer, String> in) throws Exception {
-                        return in.sortByKey(false);
-                    }
-                }
+                (Function<JavaPairRDD<Integer, String>, JavaPairRDD<Integer, String>>) in -> in.sortByKey(false)
         );
 
 
@@ -125,7 +113,7 @@ public class StreamTweets {
             for (Tuple2<Integer, String> t: rdd.take(25)) out.append(t.toString()).append("\n");
             System.out.println(out);       // print on the console
             // store top 25 hashtags on the file
-            List<String> temp = new ArrayList<String>();
+            List<String> temp = new ArrayList<>();
             temp.add(out.toString());
             JavaRDD<String> distData = sparkcontext.parallelize(temp);
             distData.saveAsTextFile("./data/tweets.txt");
